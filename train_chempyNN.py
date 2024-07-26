@@ -120,9 +120,3 @@ np.savez('data/tutorial_weights.npz',
          w0=w0, w1=w1, b0=b0, b1=b1,
          in_mean=x_mean, in_std=x_std, out_mean=y_mean, out_std=y_std,
          activation='tanh', neurons=neurons)
-
-
-# --- Test the neural network -----------------------------------------------------------------------------------------
-def stacked_net_output(in_par):
-    l1 = np.matmul(in_par, w0) + b0
-    return np.matmul(np.tanh(l1), w1) + b1
