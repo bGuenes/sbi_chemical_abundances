@@ -8,6 +8,7 @@ import torch
 from torch.distributions.normal import Normal
 from torch.distributions.uniform import Uniform
 import time as t
+import pickle
 
 
 # --- Load the Network ------------------------------------------------------------------------------------------------
@@ -45,23 +46,26 @@ def stacked_net_output(in_par):
 a = ModelParameters()
 priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
 
-combined_priors = utils.MultipleIndependent([
-    Normal(priors[0, 0]*torch.ones(1), priors[0, 1]*torch.ones(1)),
-    Normal(priors[1, 0]*torch.ones(1), priors[1, 1]*torch.ones(1)),
-    Normal(priors[2, 0]*torch.ones(1), priors[2, 1]*torch.ones(1)),
-    Normal(priors[3, 0]*torch.ones(1), priors[3, 1]*torch.ones(1)),
-    Normal(priors[4, 0]*torch.ones(1), priors[4, 1]*torch.ones(1)),
-    Uniform(torch.tensor([2.0]), torch.tensor([12.8]))
-    ], validate_args=False)
+combined_priors = utils.MultipleIndependent(
+    [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
+    [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
+    validate_args=False)
+
 
 # --- sbi setup -------------------------------------------------------------------------------------------------------
-num_sim = 1000
-method = 'SNRE' #SNPE or SNLE or SNRE
+num_sim = 100000
+method = 'SNPE' #SNPE or SNLE or SNRE
+
+start = t.time()
 posterior = infer(
     stacked_net_output,
     combined_priors,
     method=method,
     num_simulations=num_sim)
 
+print(f'Time taken to train the posterior with {num_sim} samples: {round(t.time() - start, 4)}s')
+
+
 # --- Save the posterior ----------------------------------------------------------------------------------------------
-posterior.save('data/tutorial_posterior')
+with open("data/posterior_SNPE.pickle", "wb") as f:
+    pickle.dump(posterior, f)
