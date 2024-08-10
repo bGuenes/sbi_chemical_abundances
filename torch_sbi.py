@@ -10,6 +10,7 @@ from sbi.analysis import pairplot
 
 import torch
 from torch.distributions.normal import Normal
+
 from torch.distributions.uniform import Uniform
 
 import tensorflow as tf
@@ -90,34 +91,61 @@ val_x = add_time_squared(val_x)
 # -----------------------
 
 # --- Define the neural network ---
-print(".")
+"""print(".")
 model = torch.nn.Sequential(
     torch.nn.Linear(train_x.shape[1], 100),
     torch.nn.Tanh(),
     torch.nn.Linear(100, 40),
     torch.nn.Tanh(),
     torch.nn.Linear(40, train_y.shape[1])
-)
-print(".")
+)"""
+
+if torch.backends.mps.is_available():
+    print("using mps")
+    device = torch.device("mps")
+
+else:
+    print("using cpu")
+    device = torch.device("cpu")
+
+
+class Model_Torch(torch.nn.Module):
+    def __init__(self):
+        super(Model_Torch, self).__init__()
+        self.l1 = torch.nn.Linear(train_x.shape[1], 100)
+        self.l2 = torch.nn.Linear(100, 40)
+        self.l3 = torch.nn.Linear(40, train_y.shape[1])
+
+    def forward(self, x):
+        x = torch.tanh(self.l1(x))
+        x = torch.tanh(self.l2(x))
+        x = self.l3(x)
+        return x
+
+
+model = Model_Torch()
+model.to(device)
+
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 loss_fn = torch.nn.MSELoss()
-print(".")
+
+
 # --- Train the neural network ---
 epochs = 15
 batch_size = 64
 for epoch in range(epochs):
-    print(".")
     for i in range(0, train_x.shape[0], batch_size):
-        x_batch = torch.tensor(train_x[i:i+batch_size], dtype=torch.float32)
-        y_batch = torch.tensor(train_y[i:i+batch_size], dtype=torch.float32)
-
-        y_pred = model(x_batch)
-        loss = loss_fn(y_pred, y_batch)
-
         optimizer.zero_grad()
+        x_batch = torch.tensor(train_x[i:i+batch_size], dtype=torch.float32, device=device)
+        y_batch = torch.tensor(train_y[i:i+batch_size], dtype=torch.float32, device=device)
+
+        #print(".")
+        y_pred = model(x_batch)
+        #print(".")
+        loss = loss_fn(y_pred, y_batch)
         loss.backward()
         optimizer.step()
 
     print(f'Epoch {epoch+1}/{epochs}, Loss: {loss.item()}')
 
-torch.save(model, 'data/tutorial_weights_pytorch.pt')
+torch.save(model.state_dict(), 'data/pytorch_state_dict.pt')
