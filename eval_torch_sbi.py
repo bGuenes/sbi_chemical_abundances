@@ -1,26 +1,12 @@
 import numpy as np
-
-#from sklearn.neural_network import MLPRegressor
-
-from Chempy.parameter import ModelParameters
-
-import sbi.utils as utils
-from sbi.inference.base import infer
-from sbi.analysis import pairplot
-
 import torch
 from torch.distributions.normal import Normal
-
 from torch.distributions.uniform import Uniform
-
-#import tensorflow as tf
-
-import time as t
 import pickle
+from sbi.analysis import pairplot
 
-
-# --------------------------- 
-
+from Chempy.parameter import ModelParameters
+import sbi.utils as utils
 # ------ Load & prepare the data ------
 
 # --- Load in training data ---
@@ -90,16 +76,6 @@ val_x = add_time_squared(val_x)
 
 # -----------------------
 
-# --- Define the neural network ---
-"""print(".")
-model = torch.nn.Sequential(
-    torch.nn.Linear(train_x.shape[1], 100),
-    torch.nn.Tanh(),
-    torch.nn.Linear(100, 40),
-    torch.nn.Tanh(),
-    torch.nn.Linear(40, train_y.shape[1])
-)"""
-
 if torch.backends.mps.is_available():
     print("using mps")
     device = torch.device("mps")
@@ -123,35 +99,6 @@ class Model_Torch(torch.nn.Module):
         return x
 
 
-model = Model_Torch()
-model.to(device)
-
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-loss_fn = torch.nn.MSELoss()
-
-
-"""# --- Train the neural network ---
-epochs = 15
-batch_size = 64
-for epoch in range(epochs):
-    for i in range(0, train_x.shape[0], batch_size):
-        optimizer.zero_grad()
-        x_batch = torch.tensor(train_x[i:i+batch_size], dtype=torch.float32, device=device)
-        y_batch = torch.tensor(train_y[i:i+batch_size], dtype=torch.float32, device=device)
-
-        #print(".")
-        y_pred = model(x_batch)
-        #print(".")
-        loss = loss_fn(y_pred, y_batch)
-        loss.backward()
-        optimizer.step()
-
-    print(f'Epoch {epoch+1}/{epochs}, Loss: {loss.item()}')
-
-torch.save(model.state_dict(), 'data/pytorch_state_dict.pt')
-"""
-
-# --- Load the Network ------------------------------------------------------------------------------------------------
 model = Model_Torch()
 model.load_state_dict(torch.load('data/pytorch_state_dict.pt'))
 model.eval()
@@ -192,6 +139,7 @@ def simulator_NN_torch(in_par):
 
 # ----- Set-up priors -----
 a = ModelParameters()
+labels = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
 priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
 
 combined_priors = utils.MultipleIndependent(
@@ -199,19 +147,24 @@ combined_priors = utils.MultipleIndependent(
     [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
 
-# ----- sbi setup -----
-num_sim = 100000
-method = 'SNPE' #SNPE or SNLE or SNRE
+# ----- Load the posterior -----
+with open("data/posterior_SNPE_torch.pickle", "rb") as f:
+    posterior = pickle.load(f)
 
-start = t.time()
-posterior = infer(
-    simulator_NN_torch,
-    combined_priors,
-    method=method,
-    num_simulations=num_sim)
+# ----- Evaluate the posterior -----
+# ----- Simulate data -----
+prior = combined_priors.sample((1,))
+simulated_data = simulator_NN_torch(prior)
 
-print(f'Time taken to train the posterior with {num_sim} samples: {round(t.time() - start, 4)}s')
+posterior_samples = posterior.sample((10000,), x=simulated_data)
+_ = pairplot(posterior_samples, figsize=(15, 15), points=prior, labels=labels)
 
-# ----- Save the posterior -----
-with open("data/posterior_SNPE_torch.pickle", "wb") as f:
-    pickle.dump(posterior, f)
+# ----- Evaluate the posterior -----
+# evaluation data
+index = 100
+x = val_x[index][:-1]*x_std + x_mean
+y = val_y[index]
+
+posterior_samples = posterior.sample((10000,), x=y)
+_ = pairplot(posterior_samples, figsize=(15, 15), points=x, labels=labels)
+
