@@ -1,7 +1,5 @@
 import numpy as np
 
-#from sklearn.neural_network import MLPRegressor
-
 from Chempy.parameter import ModelParameters
 
 import sbi.utils as utils
@@ -10,10 +8,7 @@ from sbi.analysis import pairplot
 
 import torch
 from torch.distributions.normal import Normal
-
 from torch.distributions.uniform import Uniform
-
-#import tensorflow as tf
 
 import time as t
 import pickle
