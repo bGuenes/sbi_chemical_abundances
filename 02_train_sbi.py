@@ -64,7 +64,7 @@ start = t.time()
 
 # --- simulate the data ---
 print()
-theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=10)
+theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1000000)
 
 # --- train ---
 print()
