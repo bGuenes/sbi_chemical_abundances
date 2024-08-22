@@ -66,6 +66,12 @@ start = t.time()
 print()
 theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1000000)
 
+# --- add noise ---
+pc_ab = 5 # percentage error in abundance
+
+x_err = np.ones_like(x)*float(pc_ab)/100.
+x = norm.rvs(loc=x,scale=x_err)
+
 # --- train ---
 print()
 density_estimator = inference.append_simulations(theta, x).train()
@@ -82,7 +88,7 @@ print(f'Time taken to train the posterior with {len(theta)} samples: '
 
 
 # ----- Save the posterior -------------------------------------------------------------------------------------------------------------------------------------------
-with open('master_thesis/data/posterior_sbi.pickle', 'wb') as f:
+with open('master_thesis/data/posterior_sbi_w5p-error.pickle', 'wb') as f:
     pickle.dump(posterior, f)
 
 print()
