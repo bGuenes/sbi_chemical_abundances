@@ -71,6 +71,7 @@ pc_ab = 5 # percentage error in abundance
 
 x_err = np.ones_like(x)*float(pc_ab)/100.
 x = norm.rvs(loc=x,scale=x_err)
+x = torch.tensor(x).float()
 
 # --- train ---
 print()
