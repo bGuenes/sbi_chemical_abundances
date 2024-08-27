@@ -32,7 +32,7 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
                         "\n"
                         fr"$\mu$: {mean:.3f} $\sigma$: {std_mu:.3f}")
         ax[i].set_xlim(x_min, x_max)
-        ax[i].plot(lin, p.max()*mu/mu.max())
+        ax[i].plot(lin, p.max()*mu/mu.max(), color="orange")
 
     for i in [0,1]:
         if i == 0:
@@ -66,6 +66,7 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
 
     rv = multivariate_normal(popt, pcov)
     perr = np.sqrt(np.diag(pcov))
+    mu_std = perr / np.sqrt(N_stars)
 
     # --- Calculate the sigma levels ---
     levels =[]
@@ -86,19 +87,21 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
         text[i].set(text=f'{c_labels[i]} $\\sigma$')
 
     plt.scatter(x_true[0], x_true[1], color='r', label='Ground Truth', s=10)
-    plt.scatter(popt[0], popt[1], color='k', marker='x', label='Fit')
+    #plt.scatter(popt[0], popt[1], color='k', marker='x', label='Fit')
+    plt.errorbar(popt[0], popt[1], yerr=mu_std[1], xerr=mu_std[0], color='k', marker='.')
 
     plt.title(f'Posterior sampling of {N_stars} stars', fontsize=40)
 
     plt.xlabel(r'$\alpha_{\rm IMF}$', fontsize=20)
     plt.ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=20)
     plt.legend()
-    plt.show();
+    plt.show()
+
 
 ##########################################################################################################
 # --- Plot 2D Histogram with side plots ---
 
-def plot_2d_hist_sides(x1, x2, x_true):
+def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     x_lim, y_lim = [-2.8,-1.8],[-3.4,-2.4]
 
     # --- Fit a 2D Gaussian to the observed data ---
@@ -113,7 +116,8 @@ def plot_2d_hist_sides(x1, x2, x_true):
     pos[:, :, 1] = Y
 
     rv = multivariate_normal(popt, pcov)
-    perr = np.sqrt(np.diag(pcov))# / np.sqrt(1000)
+    perr = np.sqrt(np.diag(pcov))
+    mu_std = perr / np.sqrt(N_stars)
 
     # --- Calculate the sigma levels ---
     levels =[]
@@ -163,11 +167,12 @@ def plot_2d_hist_sides(x1, x2, x_true):
     # labels
     label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[1].item(), 2)}$'
     
-    label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(popt[0].item(), 2)} \\pm {round(perr[0].item(),2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(popt[1].item(), 2)} \\pm {round(perr[1].item(),2)}$'
+    label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(popt[0].item(), 2)} \\pm {round(mu_std[0].item(),2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(popt[1].item(), 2)} \\pm {round(mu_std[1].item(),2)}$'
     
     # plot the ground truth and the fit
     legend_true = axTemperature.scatter(x_true[0], x_true[1], color='r', label=label_gt, s=10)
-    legend_fit = axTemperature.scatter(popt[0], popt[1], color='k', marker='x', label=label_fit)
+    #legend_fit = axTemperature.scatter(popt[0], popt[1], color='k', marker='x', label=label_fit)
+    legend_fit = axTemperature.errorbar(popt[0], popt[1], yerr=mu_std[1], xerr=mu_std[0], color='k', marker='.', label=label_fit)
 
     axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=20)
     axTemperature.set_ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=20)
@@ -190,9 +195,10 @@ def plot_2d_hist_sides(x1, x2, x_true):
     #fig.text(0.85, 0.9, r'$\log_{10} N_{\rm Ia}$', fontsize=20)
     
 
-    fig.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=1, bbox_to_anchor=(0.99, 0.92))
-    fig.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=1, bbox_to_anchor=(0.99, 0.99))
+    fig.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0.05, 0.92))
+    fig.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0.05, 0.99))
     plt.show()
+
 
 ##########################################################################################################
 # --- N-Star parameter plot ---
@@ -230,8 +236,9 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
 
     ax[0].set_xlabel(r'$N_{\rm stars}$', fontsize=20)
     ax[0].set_ylabel(r'$\alpha_{\rm IMF}$', fontsize=20)
-    ax[0].set_ylim([-2.6,-2.0])
-    ax[0].set_xlim([0,1000])
+    ax[0].set_ylim([-2.5,-2.1])
+    ax[0].set_xlim([1,1000])
+    ax[0].set_xscale('log')
     ax[0].legend(fontsize=15, fancybox=True, shadow=True)
 
     # Plot log10_N_Ia
@@ -243,10 +250,12 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
 
     ax[1].set_xlabel(r'$N_{\rm stars}$', fontsize=20)
     ax[1].set_ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=20)
-    ax[1].set_ylim([-3.1,-2.6])
-    ax[1].set_xlim([0,1000])
+    ax[1].set_ylim([-3.05,-2.65])
+    ax[1].set_xlim([1,1000])
+    ax[1].set_xscale('log')
     #ax[1].legend(fontsize=15, fancybox=True, shadow=True)
 
     plt.show()
+
 
 ##########################################################################################################
