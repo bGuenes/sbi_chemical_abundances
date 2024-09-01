@@ -27,9 +27,9 @@ def load_abundances():
     data = np.load('../../ChempyMulti/tutorial_data/TNG_Training_Data.npz', mmap_mode='r')
     abun = np.load("../data/abun.npy")
     time = np.load("../data/time.npy")
-    el = data['elements']
+    #el = data['elements']
 
-    return abun, time, el
+    return abun, time#, el
 
 def load_posterior():
     alpha_IMF_obs = np.load("../data/alpha_IMF_obs.npy")
@@ -125,7 +125,8 @@ class Plot1(Scene):
         # Step 2: Simulate Data
 
         def sim_box(w, h):
-            abun, time, el = load_abundances()
+            abun, time = load_abundances()
+            abun = np.delete(abun[:,0], 2, axis=1).T
 
             sim_text = Text(r"Simulated Data", font=font, color=BLACK).scale(0.4)
 
@@ -137,9 +138,9 @@ class Plot1(Scene):
             ).set_stroke(width=1)
 
             lines = []
-            colors = ["#7285db", "#6474c0", "#5664a4", "#475389", "#39436e", "#2b3252", "#1c2137", "#0e111b", "#000000"]
-            for i in range(len(el)):
-                graph = axs.plot_line_graph(time, abun[:,0, i], line_color=colors[i], add_vertex_dots=False).set_stroke(width=1)
+            colors = ["#7285db", "#6474c0", "#5664a4", "#475389", "#39436e", "#2b3252", "#1c2137", "#0e111b"]
+            for i in range(abun.shape[0]):
+                graph = axs.plot_line_graph(time, abun[i], line_color=colors[i], add_vertex_dots=False).set_stroke(width=1)
                 lines.append(graph)
 
             graph = VGroup(*lines)
