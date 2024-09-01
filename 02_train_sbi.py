@@ -1,12 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 from Chempy.parameter import ModelParameters
 
 import sbi.utils as utils
 from sbi.inference import SNPE, prepare_for_sbi, simulate_for_sbi
-from sbi.analysis import pairplot
 
 import torch
 from torch.distributions.normal import Normal
@@ -45,14 +43,19 @@ class Model_Torch(torch.nn.Module):
 model = Model_Torch()
 
 # --- Load the weights ---
-model.load_state_dict(torch.load('master_thesis/data/pytorch_state_dict.pt'))
+model.load_state_dict(torch.load('data/pytorch_state_dict.pt'))
 model.eval()
 
 
 # ----- Set up the simulator -------------------------------------------------------------------------------------------------------------------------------------------
 def simulator(params):
     y = model(params)
-    return y.detach().numpy()
+    y = y.detach().numpy()
+
+    # Remove H from data, because it is just used for normalization (output with index 2)
+    y = np.delete(y, 2)
+
+    return y
 
 simulator, prior = prepare_for_sbi(simulator, combined_priors)
 
@@ -89,7 +92,7 @@ print(f'Time taken to train the posterior with {len(theta)} samples: '
 
 
 # ----- Save the posterior -------------------------------------------------------------------------------------------------------------------------------------------
-with open('master_thesis/data/posterior_sbi_w5p-error.pickle', 'wb') as f:
+with open('data/posterior_sbi_w5p-error_noH.pickle', 'wb') as f:
     pickle.dump(posterior, f)
 
 print()
