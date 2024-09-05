@@ -223,14 +223,17 @@ class Plot1(Scene):
         # -------------------
         # group all steps
         loop = VGroup(sim, two, sbi)
-        box = SurroundingRectangle(loop, color="#2F2827", corner_radius=0.15, buff=0.15)
-        text = Tex(r"$*N_{stars}$", color=BLACK).scale(0.8).next_to(loop, UP, buff=0.2).align_to(loop, RIGHT)
-        text.move_to(box.get_corner(UR) + 0.2*UP + LEFT*text.width)
-        self.add(box)
+        #box = SurroundingRectangle(loop, color="#2F2827", corner_radius=0.15, buff=0.15)
+        text = Tex(r"$*N_{stars}$", color=BLACK).scale_to_fit_width(three.width) #.scale(0.8).next_to(loop, UP, buff=0.2).align_to(loop, RIGHT)
+        text.next_to(three, UP, buff=0.1).move_to(three.get_center() + 0.25*text.width*LEFT + 0.3*UP)
+        #text.align_to(three, RIGHT)
+        #text.next_to(sbi, RIGHT, buff=0.2)
+        #text.move_to(box.get_corner(UR) + 0.2*UP + LEFT*text.width)
+        #self.add(box)
         self.add(text)
-        post.scale_to_fit_height(box.height).next_to(three, RIGHT, buff=0.2)
+        #post.scale_to_fit_height(box.height).next_to(three, RIGHT, buff=0.2)
 
-        steps = VGroup(step_one, one, sim, two, sbi, box, three, post)
+        steps = VGroup(step_one, one, sim, two, sbi, three, post)
         # adjust to screen width
         steps.scale_to_fit_width(14)
         steps.move_to(ORIGIN)

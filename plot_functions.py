@@ -13,10 +13,8 @@ def mean_error(x, N_stars):
 
     return mean, err, std
 
-
 ##########################################################################################################
 # --- Plot 1D Histogram ---
-
 def plot_1d_hist(x1, x2, x_true, names, simulations):
     fig, ax = plt.subplots(1,2, figsize=(12,6))
     plot_width = 0.3
@@ -55,8 +53,6 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
     plt.tight_layout()
     plt.show()
 
-
-
 ##########################################################################################################
 # --- 2D Histogram preparation ---
 def hist_2d_prep(x1, x2, x_true, N_stars):
@@ -91,9 +87,14 @@ def hist_2d_prep(x1, x2, x_true, N_stars):
 
 ##########################################################################################################
 # --- Plot 2D Histogram ---
-
 def plot_2d_hist(x1, x2, x_true, N_stars):
     x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
+
+    # labels
+    label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[1].item(), 2)}$'
+    
+    label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(mean_1.item(), 3)} \\pm {round(err_1.item(),3)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(mean_2.item(), 3)} \\pm {round(err_2.item(),3)}$'
+    
 
     # --- Plot the data ---
     plt.figure(figsize=(15,15))
@@ -105,20 +106,22 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
     for i in range(len(sigma)):
         text[i].set(text=f'{sigma[i]} $\\sigma$')
 
-    plt.scatter(x_true[0], x_true[1], color='r', label='Ground Truth', s=10)
-    plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.')
+    legend_true = plt.scatter(x_true[0], x_true[1], color='r', s=10, label=label_gt)
+    legend_fit = plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
-    plt.title(f'Posterior sampling of {N_stars} stars', fontsize=40)
+    legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
+    legend_true = plt.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.99))
+    
+    plt.gca().add_artist(legend_fit)
+    plt.gca().add_artist(legend_true)
 
     plt.xlabel(r'$\alpha_{\rm IMF}$', fontsize=20)
     plt.ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=20)
-    plt.legend()
+    #plt.legend(fontsize=15, shadow=True, fancybox=True, loc=2,)
     plt.show()
-
 
 ##########################################################################################################
 # --- Plot 2D Histogram with side plots ---
-
 def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
 
@@ -158,7 +161,7 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
 
     # draw contour lines on sigma levels
     CS = axTemperature.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
-    text = axTemperature.clabel(CS, inline=True, fontsize=10)
+    text = axTemperature.clabel(CS, inline=True, fontsize=15)
     for i in range(len(sigma)):
         text[i].set(text=f'{sigma[i]} $\\sigma$')
 
@@ -171,8 +174,8 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     legend_true = axTemperature.scatter(x_true[0], x_true[1], color='r', label=label_gt, s=10)
     legend_fit = axTemperature.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
-    axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=20)
-    axTemperature.set_ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=20)
+    axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
+    axTemperature.set_ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=40)
     
 
     # plot the histograms
@@ -188,15 +191,13 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     axHistx.set_xlim(x_lim)
     axHisty.set_ylim(y_lim)    
 
-    fig.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0.05, 0.92))
-    fig.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0.05, 0.99))
+    fig.legend(handles=[legend_true], fontsize=20, shadow=True, fancybox=True, loc=2)#, bbox_to_anchor=(0.05, 0.92))
+    fig.legend(handles=[legend_fit], fontsize=20, shadow=True, fancybox=True, loc=1)#, bbox_to_anchor=(0.05, 0.99))
 
     plt.show()
 
-
 ##########################################################################################################
 # --- N-Star parameter plot ---
-
 def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
     fit = []
     err = []
@@ -227,7 +228,7 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
 
         ax.set_xlabel(r'$N_{\rm stars}$', fontsize=20)
         ax.set_ylabel(name, fontsize=20)
-        ax.set_ylim([x_true-0.2*abs(x_true), x_true+0.2*abs(x_true)])
+        ax.set_ylim([x_true-0.1*abs(x_true), x_true+0.1*abs(x_true)])
         ax.set_xscale('log')
         ax.set_xlim([1,1000])
 
@@ -238,6 +239,5 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
     
     plt.tight_layout()
     plt.show()
-
 
 ##########################################################################################################
