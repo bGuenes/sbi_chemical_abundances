@@ -4,7 +4,8 @@ from scipy.stats import norm
 from Chempy.parameter import ModelParameters
 
 import sbi.utils as utils
-from sbi.inference import SNPE, prepare_for_sbi, simulate_for_sbi
+from sbi.utils.user_input_checks import check_sbi_inputs, process_prior, process_simulator
+from sbi.inference import NPE, simulate_for_sbi
 
 import torch
 from torch.distributions.normal import Normal
@@ -57,17 +58,22 @@ def simulator(params):
 
     return y
 
-simulator, prior = prepare_for_sbi(simulator, combined_priors)
+
+prior, num_parameters, prior_returns_numpy = process_prior(combined_priors)
+simulator = process_simulator(simulator, prior, prior_returns_numpy)
+check_sbi_inputs(simulator, prior)
 
 
 # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
-inference = SNPE(prior=prior, show_progress_bars=True)
+inference = NPE(prior=prior, show_progress_bars=True)
 
 start = t.time()
 
 # --- simulate the data ---
 print()
+print("Simulating data...")
 theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1000000)
+print(f"Genereted {len(theta)} samples")
 
 # --- add noise ---
 pc_ab = 5 # percentage error in abundance
@@ -78,6 +84,7 @@ x = torch.tensor(x).float()
 
 # --- train ---
 print()
+print("Training the posterior...")
 density_estimator = inference.append_simulations(theta, x).train()
 
 # --- build the posterior ---
