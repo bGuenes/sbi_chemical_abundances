@@ -176,7 +176,7 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
 
     axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
     axTemperature.set_ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=40)
-    
+    axTemperature.tick_params(labelsize=30)
 
     # plot the histograms
     axHistx.hist(x1, bins=500, density=True, alpha=0.6, color='g')
@@ -191,8 +191,8 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     axHistx.set_xlim(x_lim)
     axHisty.set_ylim(y_lim)    
 
-    fig.legend(handles=[legend_true], fontsize=20, shadow=True, fancybox=True, loc=2)#, bbox_to_anchor=(0.05, 0.92))
-    fig.legend(handles=[legend_fit], fontsize=20, shadow=True, fancybox=True, loc=1)#, bbox_to_anchor=(0.05, 0.99))
+    fig.legend(handles=[legend_true], fontsize=25, shadow=True, fancybox=True, loc=2)#, bbox_to_anchor=(0.05, 0.92))
+    fig.legend(handles=[legend_fit], fontsize=25, shadow=True, fancybox=True, loc=1)#, bbox_to_anchor=(0.05, 0.99))
 
     plt.show()
 
