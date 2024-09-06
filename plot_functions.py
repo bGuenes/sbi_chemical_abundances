@@ -241,3 +241,72 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
     plt.show()
 
 ##########################################################################################################
+# --- N-Star comparison plot ---
+
+def n_stars_plot_comp(x1, x2, x_true, dat, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
+    fit = []
+    err = []
+
+    # Extract the lambda values and n-stars
+    all_Lambdas = dat.f.Lambdas
+    n_stars = dat.f.n_stars
+
+    # Here we compute the statistical variances, averaged across realizations with the same value of n-stars
+    med,lo,up,lo2,up2,sample_lo,sample_hi=[np.zeros((len(n_stars),2)) for _ in range(7)]
+    for i in range(len(n_stars)):
+        # Select only the Lambda estimates for this value of n-stars
+        theseL=all_Lambdas[i]
+        # Now compute the median, 1- and 2-sigma parameter ranges from the output chains for each realization using this n-stars.
+        lowL2,lowL,medianL,upL,upL2 = [[np.percentile(L,p,axis=0) for L in theseL] for p in [2.275,15.865,50.,84.135,97.725]]
+        # Take the average over all realizations
+        up[i]=np.median(upL,axis=0)
+        lo[i]=np.median(lowL,axis=0)
+        up2[i]=np.median(upL2,axis=0)
+        lo2[i]=np.median(lowL2,axis=0)
+        med[i]=np.median(medianL,axis=0)
+
+    # --- Fit a 2D Gaussian to the data ---
+    for n in no_stars:
+        samples = int(n*simulations)
+        N_stars = int(samples/simulations)
+        mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
+        mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
+
+        fit.append([mean_1, mean_2])
+        err.append([err_1, err_2])
+        
+
+    fit = np.array(fit)
+    err = np.array(err)
+
+    # --- Plot the data ---
+    fig,ax=plt.subplots(nrows=1,ncols=2,figsize=(26,6))
+
+    def plot(fit, err, x_true, ax, name):
+        ax.plot(no_stars, fit, color="b", label="Fit")
+        ax.fill_between(no_stars, fit-err, fit+err, alpha=0.1,color="b", label=r"1 & 2 $\sigma$")
+        ax.fill_between(no_stars, fit-2*err, fit+2*err, alpha=0.1,color="b")
+
+        ax.axhline(x_true, color='k', linestyle=':', linewidth=2, label='Ground Truth')
+
+        ax.set_xlabel(r'$N_{\rm stars}$', fontsize=40)
+        ax.set_ylabel(name, fontsize=40)
+        ax.set_ylim([x_true-0.2*abs(x_true), x_true+0.2*abs(x_true)])
+        ax.set_xscale('log')
+        ax.set_xlim([1,1000])
+        ax.tick_params(labelsize=30, size=10, width=3)
+        ax.tick_params(which='minor', size=5, width=2)
+        # Add Philcox
+        ax.plot(n_stars,med[:,i],c='r', label="HMC")
+        ax.fill_between(n_stars,lo[:,i],up[:,i],alpha=0.2,color='r')
+        ax.fill_between(n_stars,lo2[:,i],up2[:,i],alpha=0.1,color='r')
+
+    for i, name in enumerate([r'$\alpha_{\rm IMF}$', r'$\log_{10} N_{\rm Ia}$']):
+        plot(fit[:,i], err[:,i], x_true[i], ax[i], name)
+
+    ax[0].legend(fontsize=20, fancybox=True, shadow=True)
+    
+    plt.tight_layout()
+    plt.show()
+
+##########################################################################################################
