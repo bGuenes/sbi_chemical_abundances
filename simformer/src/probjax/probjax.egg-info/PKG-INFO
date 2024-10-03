@@ -1,0 +1,60 @@
+Metadata-Version: 2.1
+Name: probjax
+Version: 0.0.0
+Summary: Jax library for probabilistic computations
+Home-page: TODO
+Author: Anonymous
+Author-email: TODO
+License: MIT
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Education
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Requires-Python: >=3.7.0
+Description-Content-Type: text/markdown
+Requires-Dist: numpy==1.26.3
+Requires-Dist: scipy==1.11.4
+Requires-Dist: matplotlib
+Requires-Dist: jax==0.4.23
+Requires-Dist: jaxlib==0.4.23
+Requires-Dist: dm-haiku<=0.0.11
+Requires-Dist: optax
+Requires-Dist: ott-jax
+Requires-Dist: networkx
+Requires-Dist: IPython
+Provides-Extra: cuda
+Requires-Dist: nvidia-cudnn-cu12==8.9.7.29; extra == "cuda"
+Requires-Dist: jaxlib@ https://storage.googleapis.com/jax-releases/cuda12/jaxlib-0.4.23+cuda12.cudnn89-cp310-cp310-manylinux2014_x86_64.whl ; extra == "cuda"
+Provides-Extra: dev
+Requires-Dist: autoflake; extra == "dev"
+Requires-Dist: black; extra == "dev"
+Requires-Dist: flake8; extra == "dev"
+Requires-Dist: isort>5.0.0; extra == "dev"
+Requires-Dist: ipdb; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: pytest-plt; extra == "dev"
+Requires-Dist: typeguard; extra == "dev"
+
+
+
+## Probjax
+
+Simple and highly experimental backend for some probabilistic computations and neural networks in JAX. 
+
+This implements a few inference backends, neural network architectures, ode/sde solvers and some other utilities. Which
+are used in the `scoresbibm` repository.
+
+### Installation
+
+If you have cuda installed, use the following command to install the package:
+
+```bash
+pip install -e src/probjax[cuda]
+```
