@@ -3,8 +3,5 @@ sbi-logs/
 Chempy/
 ChempyMulti/
 manim_plot/media/
-simformer/sns/
-simformer/sns2/
-simformer/sns3/
-simformer/sns4/
+simformer/plots/
 simformer/samples.npy
