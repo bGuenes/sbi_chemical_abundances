@@ -39,7 +39,6 @@ class BaseSDE():
     Args:
         drift (Callable): Drift function
         diffusion (Callable): Diffusion function
-        p0 (Distribution): Initial distribution
     """
       def __init__(self, drift, diff):
           self.drift = drift
@@ -47,7 +46,7 @@ class BaseSDE():
       
       def diffusion(self, x, t):
         eps = torch.randn_like(x)
-        return x + self.drift(t) + self.diff(t) * eps
+        return x + (self.drift(t) + eps.mT * self.diff(t)).mT
 
 
 class VPSDE(BaseSDE):
@@ -72,7 +71,7 @@ class VESDE(BaseSDE):
             Drift     -> f(x,t) = 0
             Diffusion -> g(t)   = sigma^t
         """
-        drift = lambda t: torch.zeros(1)
+        drift = lambda t: torch.zeros_like(t)
         
         _const = torch.sqrt(2 * torch.log(torch.tensor([sigma_max / sigma_min])))
         diff = lambda t: sigma_min * (sigma_max / sigma_min) ** t * _const
