@@ -58,8 +58,8 @@ class VPSDE(BaseSDE):
             Drift     -> f(x,t) = -1/2 * beta_t * x
             Diffusion -> g(t)   = sqrt(beta_t)
         """
-        drift = lambda t: -0.5 * self.betas[t]
-        diff = lambda t: torch.sqrt(self.betas[t])
+        drift = lambda t: -0.5 * (beta_min + (beta_max - beta_min) * t)
+        diff = lambda t: torch.sqrt(beta_min + (beta_max - beta_min) * t)
 
         super().__init__(drift, diff)
 
@@ -83,31 +83,37 @@ class VESDE(BaseSDE):
 # --------------------------------------------------------------------------------------------------
 
 class Simformer(nn.Module):
-    def __init__(self, timesteps, sde_type="vesde"):
+    def __init__(self, timesteps, sde_type="vesde",
+                  sigma=[0.0001, 15.0], beta=[0.01, 10.0]):
+        """
+        Simformer class
+
+        Args:
+            timesteps (int): Number of timesteps
+            sde_type (str): Type of SDE to use (VESDE or VPSDE)
+            sigma (tuple): Sigma values for VESDE
+            beta (tuple): Beta values for the VPSDE
+        """
+
         super(Simformer, self).__init__()
 
-        self.betas = self.linear_beta_schedule(timesteps=timesteps)
-        self.alphas = 1. - self.betas
-        self.alphas_cumprod = torch.cumprod(self.alphas, axis=0) # Cumulative product of alphas at each timestep
-
-        self.sde_type = sde_type
+        self.normed_t = torch.linspace(0., 1., timesteps)
 
         self.time_embedding = GaussianFourierEmbedding(64)
 
         if sde_type == "vesde":
-            self.sde = VESDE()
+            self.sde = VESDE(sigma[0], sigma[1])
         elif sde_type == "vpsde":
-            self.sde = VPSDE()
+            self.sde = VPSDE(beta[0], beta[1])
         else:
             raise ValueError("Invalid SDE type")
 
-    def linear_beta_schedule(self, timesteps, start=0.0001, end=0.02):
-        return torch.linspace(start, end, timesteps)
 
-    def forward_diffusion_sample(self, x_0, t, device="cpu"):
+    def forward_diffusion_sample(self, x_0, T, device="cpu"):
         """ 
         Takes an image and a timestep as input and 
         returns the noisy version of it
         """
+        t = self.normed_t[T]
         x_1 = self.sde.diffusion(x_0, t)
         return x_1
