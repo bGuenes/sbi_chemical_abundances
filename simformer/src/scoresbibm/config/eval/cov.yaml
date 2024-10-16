@@ -1,7 +1,0 @@
-
-
-
-defaults:
-   - metric:
-      - cov_posterior
-      - cov_likelihood
