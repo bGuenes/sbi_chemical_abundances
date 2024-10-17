@@ -4,20 +4,19 @@ from scipy.stats import norm
 
 from Chempy.parameter import ModelParameters
 
-import sbi.utils as utils
-from sbi.inference import SNPE, prepare_for_sbi, simulate_for_sbi
-from sbi.analysis import pairplot
-
 import torch
 from torch.distributions.normal import Normal
 from torch.distributions.uniform import Uniform
 
 import time as t
-import pickle
+import os
+
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
-path_training = 'ChempyMulti/tutorial_data/TNG_Training_Data.npz'
+path_training = os.path.dirname(__file__) + '/data/chempy_data/TNG_Training_Data.npz'
 training_data = np.load(path_training, mmap_mode='r')
 
 elements = training_data['elements']
@@ -26,7 +25,7 @@ train_y = training_data['abundances']
 
 
 # ---  Load in the validation data ---
-path_test = 'ChempyMulti/tutorial_data/TNG_Test_Data.npz'
+path_test = os.path.dirname(__file__) + '/data/chempy_data/TNG_Test_Data.npz'
 val_data = np.load(path_test, mmap_mode='r')
 
 val_x = val_data['params']
@@ -53,10 +52,10 @@ train_x, train_y = clean_data(train_x, train_y)
 val_x, val_y     = clean_data(val_x, val_y)
 
 # convert to torch tensors
-train_x = torch.tensor(train_x, dtype=torch.float32)
-train_y = torch.tensor(train_y, dtype=torch.float32)
-val_x = torch.tensor(val_x, dtype=torch.float32)
-val_y = torch.tensor(val_y, dtype=torch.float32)
+train_x = torch.tensor(train_x, dtype=torch.float32).to(device)
+train_y = torch.tensor(train_y, dtype=torch.float32).to(device)
+val_x = torch.tensor(val_x, dtype=torch.float32).to(device)
+val_y = torch.tensor(val_y, dtype=torch.float32).to(device)
 
 
 # ----- Define the prior ------------------------------------------------------------------------------------------------------------------------------------------
@@ -66,8 +65,6 @@ priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_opti
 
 
 # ----- Define the model ------------------------------------------------------------------------------------------------------------------------------------------
-
-device = torch.device('cpu')
 
 class Model_Torch(torch.nn.Module):
     def __init__(self):
@@ -109,8 +106,8 @@ for epoch in range(epochs):
         optimizer.zero_grad()
         
         # Get the batch
-        x_batch = train_x[i:i+batch_size].to(device).requires_grad_(True)
-        y_batch = train_y[i:i+batch_size].to(device).requires_grad_(True)
+        x_batch = train_x[i:i+batch_size].requires_grad_(True)
+        y_batch = train_y[i:i+batch_size].requires_grad_(True)
         
         # Forward pass
         y_pred = model(x_batch)
@@ -146,10 +143,12 @@ plt.xlabel('Epoch', fontsize=14)
 plt.ylabel('MSE Loss', fontsize=14)
 plt.title('Training and Validation Loss', fontsize=14)
 plt.legend()
-plt.show()
+plt.savefig("plots/loss_NN_simulator.png")
+plt.clf()
 
 # ----- Calculate the L1 error -----
-l1_err = np.abs(model(val_x).detach().numpy() - val_y.numpy())
+
+l1_err = torch.abs(model(val_x) - val_y).detach().cpu().numpy()
 p1,p2,p3=np.percentile(l1_err,[15.865,50.,100-17.865],axis=0).mean(axis=1)
 
 plt.hist(l1_err.flatten(), range=[0,.08], bins=100, density=True)
@@ -157,7 +156,8 @@ plt.xlabel(r'L1 Error [dex]', fontsize=14)
 plt.ylabel(r'PDF', fontsize=14)
 
 plt.title(r'L1 error (averaged across elements): %.3f-%.3f+%.3f'%(p2,p2-p1,p3-p2), fontsize=14)
-plt.show()
+plt.savefig("plots/l1_error_NN_simulator.png")
+plt.clf()
 
 # ----- Save the model --------------------------------------------------------------------------------------------------------------------------------------------
 torch.save(model.state_dict(), 'data/pytorch_state_dict.pt')
