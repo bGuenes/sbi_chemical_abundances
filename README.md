@@ -1,6 +1,6 @@
 # Inferring Galactic Parameters from Chemical Abundances with Simulation-Based Inference
 
-![](plots/sbi2.png)
+![](plots/sbi3.png)
 
 ## 1. Train NN
 Firstly we train a neural network to learn the mapping from chemical abundances to galactic parameters. For this we use data created with $CHEMPY$ as simulator. <br>

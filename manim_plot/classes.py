@@ -29,8 +29,9 @@ class NeuralNetworkMobject(VGroup):
 
     # Constructor with parameters of the neurons in a list
     def __init__(self, neural_network, *args, **kwargs):
-        self.__dict__.update(self.CONFIG)
-        VGroup.__init__(self, *args, **kwargs)
+        config = {**self.CONFIG, **kwargs}
+        self.__dict__.update(config)
+        VGroup.__init__(self, *args,)
         self.layer_sizes = neural_network
         self.add_neurons()
         self.add_edges()

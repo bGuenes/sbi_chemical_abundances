@@ -121,8 +121,35 @@ class Plot1(Scene):
         one = Tex(r"\}", color="#2F2827").stretch_to_fit_height(step_one.height).next_to(step_one, RIGHT, buff=0.2)
         self.add(one)
 
+
         # -------------------
-        # Step 2: Simulate Data
+        # Step 2: NN Simulator
+
+        def nn_box(w, h):
+            nn_text = Text(r"NN Simulator", font=font, color=BLACK).scale(0.4)
+
+            NN = NeuralNetworkMobject([2, 5, 5, 2], output_neuron_color="#475389", input_neuron_color=ORANGE).scale_to_fit_width(w)
+            text = Text("NN Simulator", font=font, color=BLACK).scale(0.4).next_to(NN, UP, buff=0.2).align_to(NN, LEFT)
+
+            NN = VGroup(NN, text).scale_to_fit_height(h)
+            box = SurroundingRectangle(NN, color="#2F2827", corner_radius=0.15, buff=0.2)
+            NN = VGroup(box, NN)
+
+            w = NN.width
+            h = NN.height
+
+            return NN, w, h
+
+        nn,w,h = nn_box(w,h)
+        self.add(nn.next_to(one, RIGHT, buff=0.2))
+
+
+
+        two = Arrow([0,0,0], [1.5,0,0], color="#2F2827").next_to(nn, RIGHT, buff=0.2)
+        self.add(two)
+
+        # -------------------
+        # Step 3: Simulate Data
 
         def sim_box(w, h):
             abun, time = load_abundances()
@@ -160,13 +187,13 @@ class Plot1(Scene):
             return plot, w, h
 
         sim, w, h = sim_box(w,h)
-        self.add(sim.next_to(one, RIGHT, buff=0.2))
+        self.add(sim.next_to(two, RIGHT, buff=0.2))
 
-        two = Arrow([0,0,0], [1.5,0,0], color="#2F2827").next_to(sim, RIGHT, buff=0.2)
-        self.add(two)
+        three = Arrow([0,0,0], [1.5,0,0], color="#2F2827").next_to(sim, RIGHT, buff=0.2)
+        self.add(three)
 
         # -------------------
-        # Step 3: SBI Model
+        # Step 4: SBI Model
 
         def sbi_box(w, h):
             sbi_text = Text(r"SBI Model", font=font, color=BLACK).scale(0.4)
@@ -181,13 +208,13 @@ class Plot1(Scene):
             return NN
 
         sbi = sbi_box(w,h)
-        self.add(sbi.next_to(two, RIGHT, buff=0.2))
+        self.add(sbi.next_to(three, RIGHT, buff=0.2))
 
-        three = Arrow([0,0,0], [1.5,0,0], color="#2F2827").next_to(sbi, RIGHT, buff=0.2)
-        self.add(three)
+        four = Arrow([0,0,0], [1.5,0,0], color="#2F2827").next_to(sbi, RIGHT, buff=0.2)
+        self.add(four)
 
         # -------------------
-        # Step 4: Posterior
+        # Step 5: Posterior
 
         def post_box(w,h):
 
@@ -218,14 +245,14 @@ class Plot1(Scene):
             return plot
 
         post = post_box(w,h)
-        self.add(post.next_to(three, RIGHT, buff=0.2))
+        self.add(post.next_to(four, RIGHT, buff=0.2))
 
         # -------------------
         # group all steps
         loop = VGroup(sim, two, sbi)
         #box = SurroundingRectangle(loop, color="#2F2827", corner_radius=0.15, buff=0.15)
         text = Tex(r"$*N_{stars}$", color=BLACK).scale_to_fit_width(three.width) #.scale(0.8).next_to(loop, UP, buff=0.2).align_to(loop, RIGHT)
-        text.next_to(three, UP, buff=0.1).move_to(three.get_center() + 0.25*text.width*LEFT + 0.3*UP)
+        text.next_to(four, UP, buff=0.1).move_to(four.get_center() + 0.4*UP)
         #text.align_to(three, RIGHT)
         #text.next_to(sbi, RIGHT, buff=0.2)
         #text.move_to(box.get_corner(UR) + 0.2*UP + LEFT*text.width)
@@ -233,7 +260,7 @@ class Plot1(Scene):
         self.add(text)
         #post.scale_to_fit_height(box.height).next_to(three, RIGHT, buff=0.2)
 
-        steps = VGroup(step_one, one, sim, two, sbi, three, post)
+        steps = VGroup(step_one, one, nn, two, sim, three, sbi, four, text, post)
         # adjust to screen width
         steps.scale_to_fit_width(14)
         steps.move_to(ORIGIN)
