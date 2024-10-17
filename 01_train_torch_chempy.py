@@ -11,9 +11,6 @@ from torch.distributions.uniform import Uniform
 import time as t
 import os
 
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
 path_training = os.path.dirname(__file__) + '/data/chempy_data/TNG_Training_Data.npz'
@@ -52,10 +49,10 @@ train_x, train_y = clean_data(train_x, train_y)
 val_x, val_y     = clean_data(val_x, val_y)
 
 # convert to torch tensors
-train_x = torch.tensor(train_x, dtype=torch.float32).to(device)
-train_y = torch.tensor(train_y, dtype=torch.float32).to(device)
-val_x = torch.tensor(val_x, dtype=torch.float32).to(device)
-val_y = torch.tensor(val_y, dtype=torch.float32).to(device)
+train_x = torch.tensor(train_x, dtype=torch.float32)
+train_y = torch.tensor(train_y, dtype=torch.float32)
+val_x = torch.tensor(val_x, dtype=torch.float32)
+val_y = torch.tensor(val_y, dtype=torch.float32)
 
 
 # ----- Define the prior ------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,7 +77,7 @@ class Model_Torch(torch.nn.Module):
         return x
 
 model = Model_Torch()
-model.to(device)
+model
 
 
 # ----- Train the model -------------------------------------------------------------------------------------------------------------------------------------------
