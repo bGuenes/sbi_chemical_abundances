@@ -1,4 +1,10 @@
 # Inferring Galactic Parameters from Chemical Abundances with Simulation-Based Inference
+$CHEMPY$ is a chemical evolution code that simulates the chemical evolution of galaxies. <br>
+We use $CHEMPY$ to simulate chemical abundances of stars in a galaxy. <br>
+We then train a neural network (NN) to learn the mapping from galactic parameters to chemical abundances to replace $CHEMPY$ as simulator and create more training points for the Neural Posterior Estimator (NPE). <br>
+Finally we use the NN to train a NPE to infer the galactic parameters from the chemical abundances.
+
+Our goal is to infer the global galactic parameters (initial mass function high-mass slope $\alpha_{IMF}$ & frequency of type Ia supernovae $log_{10}N_{Ia}$) from the chemical abundances of stars in a galaxy. <br>
 
 ![](plots/sbi3.png)
 
@@ -15,8 +21,13 @@ It took around $50s$ to train the NN on CPU. <br>
 </div>
 
 ## 2. Train SBI
-Secondly we use the trained neural network to train a simulator-based inference algorithm. We use the Sequential Neural Posterior Estimation (SNPE) algorithm. <br>
-For that a total of 1 million simulations are used to train the algorithm.
+Secondly we use the NN to train a Neural Posterior Estimator (NPE). <br>
+For that a total of 1 million datapoints simulated with the NN are used to train the NPE until it converges.
+This takes approximatley $3$ h on CPU. <br>
+The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. <br>
+The NPE is has an absolute percantage error (APE) of $13.7^{+22.1}_{-10.6}\%$ for a single prediction. <br>
+
+![](plots/ape_posterior.png)
 
 ## 3. Sample from Posterior
 Finally we sample from the posterior distribution to infer the galactic parameters.
