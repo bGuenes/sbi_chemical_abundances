@@ -72,7 +72,7 @@ start = t.time()
 # --- simulate the data ---
 print()
 print("Simulating data...")
-theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1000000)
+theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1000)
 print(f"Genereted {len(theta)} samples")
 
 # --- add noise ---
@@ -85,7 +85,7 @@ x = torch.tensor(x).float()
 # --- train ---
 print()
 print("Training the posterior...")
-density_estimator = inference.append_simulations(theta, x).train()
+density_estimator = inference.append_simulations(theta, x).train(show_train_summary=True)
 
 # --- build the posterior ---
 posterior = inference.build_posterior(density_estimator)
