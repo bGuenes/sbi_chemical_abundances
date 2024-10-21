@@ -99,8 +99,8 @@ print(f'Time taken to train the posterior with {len(theta)} samples: '
 
 
 # ----- Save the posterior -------------------------------------------------------------------------------------------------------------------------------------------
-with open('data/posterior_sbi_w5p-error_noH.pickle', 'wb') as f:
-    pickle.dump(posterior, f)
+#with open('data/posterior_sbi_w5p-error_noH.pickle', 'wb') as f:
+#    pickle.dump(posterior, f)
 
 print()
 print("Posterior trained and saved!")
