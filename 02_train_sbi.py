@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 from Chempy.parameter import ModelParameters
@@ -6,6 +7,8 @@ from Chempy.parameter import ModelParameters
 import sbi.utils as utils
 from sbi.utils.user_input_checks import check_sbi_inputs, process_prior, process_simulator
 from sbi.inference import NPE, simulate_for_sbi
+from sbi.analysis.plot import sbc_rank_plot
+from sbi.diagnostics import check_sbc, check_tarp, run_sbc, run_tarp
 
 import torch
 from torch.distributions.normal import Normal
@@ -13,6 +16,10 @@ from torch.distributions.uniform import Uniform
 
 import time as t
 import pickle
+import os
+import tqdm
+
+file_path = os.path.dirname(__file__)
 
 # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Define the prior ---
@@ -44,7 +51,7 @@ class Model_Torch(torch.nn.Module):
 model = Model_Torch()
 
 # --- Load the weights ---
-model.load_state_dict(torch.load('data/pytorch_state_dict.pt'))
+model.load_state_dict(torch.load(file_path + '/data/pytorch_state_dict.pt'))
 model.eval()
 
 
@@ -72,7 +79,7 @@ start = t.time()
 # --- simulate the data ---
 print()
 print("Simulating data...")
-theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1000)
+theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1_000_000)
 print(f"Genereted {len(theta)} samples")
 
 # --- add noise ---
@@ -99,9 +106,124 @@ print(f'Time taken to train the posterior with {len(theta)} samples: '
 
 
 # ----- Save the posterior -------------------------------------------------------------------------------------------------------------------------------------------
-#with open('data/posterior_sbi_w5p-error_noH.pickle', 'wb') as f:
-#    pickle.dump(posterior, f)
+with open('data/posterior_sbi_w5p-error_noH.pickle', 'wb') as f:
+    pickle.dump(posterior, f)
 
 print()
 print("Posterior trained and saved!")
 print()
+
+
+# ----- Evaluate the posterior -------------------------------------------------------------------------------------------------------------------------------------------
+# --- Load the validation data ---
+
+print("Evaluating the posterior...")
+path_test = file_path + '/data/chempy_data/TNG_Test_Data.npz'
+val_data = np.load(path_test, mmap_mode='r')
+
+val_theta = val_data['params']
+val_x = val_data['abundances']
+
+
+# --- Clean the data ---
+# Chempy sometimes returns zeros or infinite values, which need to removed
+def clean_data(x, y):
+    # Remove all zeros from the training data
+    index = np.where((y == 0).all(axis=1))[0]
+    x = np.delete(x, index, axis=0)
+    y = np.delete(y, index, axis=0)
+
+    # Remove all infinite values from the training data
+    index = np.where(np.isfinite(y).all(axis=1))[0]
+    x = x[index]
+    y = y[index]
+
+    return x, y
+
+val_theta, val_x     = clean_data(val_theta, val_x)
+
+# convert to torch tensors
+val_theta = torch.tensor(val_theta, dtype=torch.float32)
+val_x = torch.tensor(val_x, dtype=torch.float32)
+abundances =  torch.cat([val_x[:,:2], val_x[:,3:]], dim=1)
+
+# add noise to data
+x_err = np.ones_like(abundances)*float(pc_ab)/100.
+abundances = norm.rvs(loc=abundances,scale=x_err)
+abundances = torch.tensor(abundances).float()
+
+theta_hat = torch.zeros_like(val_theta)
+for index in tqdm(range(len(abundances))):
+    thetas_predicted = posterior.sample((1000,), x=abundances[index], show_progress_bars=False)
+    theta_predicted = thetas_predicted.mean(dim=0)
+    theta_hat[index] = theta_predicted
+
+ape = torch.abs((val_theta - theta_hat) / val_theta) *100
+
+
+# --- Absolute percentage error plot ---
+
+fig, (ax_box, ax_hist) = plt.subplots(2, sharex=True, gridspec_kw={"height_ratios": (.20, .80)})
+
+ax_hist.hist(ape.flatten(), bins=100, density=True, range=(0, 100), color='tomato')
+ax_hist.set_xlabel('Error (%)', fontsize=15)
+ax_hist.set_ylabel('Density', fontsize=15)
+ax_hist.spines['top'].set_visible(False)
+ax_hist.spines['right'].set_visible(False)
+# percentiles
+p1,p2,p3 = np.percentile(ape, [25, 50, 75])
+ax_hist.axvline(p2, color='black', linestyle='--')
+ax_hist.axvline(p1, color='black', linestyle='dotted')
+ax_hist.axvline(p3, color='black', linestyle='dotted')
+ax_hist.text(p2, 0.1, fr'${p2:.1f}^{{+{p3-p2:.1f}}}_{{-{p2-p1:.1f}}}\%$', fontsize=12, verticalalignment='top')
+
+ax_box.boxplot(ape.flatten(), vert=False, autorange=False, widths=0.5, patch_artist=True, showfliers=False, boxprops=dict(facecolor='tomato'), medianprops=dict(color='black'))
+ax_box.set(yticks=[])
+ax_box.spines['left'].set_visible(False)
+ax_box.spines['right'].set_visible(False)
+ax_box.spines['top'].set_visible(False)
+
+fig.suptitle('APE of the Posterior', fontsize=20)
+plt.xlim(0, 100)
+fig.tight_layout()
+plt.savefig(file_path + '/data/APE_posterior.png')
+plt.clf()
+
+
+# --- Simulation based calibration plot ---
+
+def simulator(params):
+    y = model(params)
+    y = y.detach().numpy()
+
+    # Remove H from data, because it is just used for normalization (output with index 2)
+    y = np.delete(y, 2,1)
+
+    return y
+
+num_sbc_samples = 200  # choose a number of sbc runs, should be ~100s
+# generate ground truth parameters and corresponding simulated observations for SBC.
+thetas = combined_priors.sample((num_sbc_samples,))
+xs = simulator(thetas)
+
+# run SBC: for each inference we draw 1000 posterior samples.
+num_posterior_samples = 1_000
+num_workers = 1
+ranks, dap_samples = run_sbc(
+    thetas, xs, posterior, num_posterior_samples=num_posterior_samples, num_workers=num_workers
+)
+
+f, ax = sbc_rank_plot(
+    ranks=ranks,
+    num_posterior_samples=num_posterior_samples,
+    parameter_labels=labels_in,
+    plot_type="hist",
+    num_cols=3,
+    figsize=(15,10),
+    num_bins=None,  # by passing None we use a heuristic for the number of bins.
+)
+
+f.suptitle("SBC rank plot", fontsize=36)
+plt.tight_layout()
+plt.savefig(file_path + '/plots/sbc_rank_plot.png')
+plt.clf()
