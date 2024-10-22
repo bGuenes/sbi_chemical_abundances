@@ -31,7 +31,7 @@ The NPE is has an absolute percantage error (APE) of $13.7^{+22.1}_{-10.6}\%$ fo
 
 <div style="display: flex; justify-content: space-between;">
   <img src="plots/sbc_rank_plot.png" style="width: 49%;"/>
-  <img src="plots/ape_posterior.png" style="width: 49%;"/>
+  <img src="plots/ape_posterior2.png" style="width: 49%;"/>
 </div>
 
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>

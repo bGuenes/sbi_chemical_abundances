@@ -164,20 +164,25 @@ ape = torch.abs((val_theta - theta_hat) / val_theta) *100
 # --- Absolute percentage error plot ---
 
 fig, (ax_box, ax_hist) = plt.subplots(2, sharex=True, gridspec_kw={"height_ratios": (.20, .80)})
+colors = ["tomato", "skyblue", "olive", "gold", "teal", "orchid"]
 
-ax_hist.hist(ape.flatten(), bins=100, density=True, range=(0, 100), color='tomato')
+for i in range(6):
+    l_quantile, median, u_quantile = np.percentile(ape[:,i], [25, 50, 75])
+    ax_hist.hist(ape[:,i], bins=25, density=True, range=(0, 100), label=labels_in[i], color=colors[i], alpha=0.5)
+    median = np.percentile(ape[:,i], 50)
+    ax_hist.axvline(median, color=colors[i], linestyle='--')
+    print(labels_in[i] + f" : {median:.1f}% + {u_quantile-median:.1f} - {median-l_quantile:.1f}")
+    print()
+    
 ax_hist.set_xlabel('Error (%)', fontsize=15)
 ax_hist.set_ylabel('Density', fontsize=15)
 ax_hist.spines['top'].set_visible(False)
 ax_hist.spines['right'].set_visible(False)
-# percentiles
-p1,p2,p3 = np.percentile(ape, [25, 50, 75])
-ax_hist.axvline(p2, color='black', linestyle='--')
-ax_hist.axvline(p1, color='black', linestyle='dotted')
-ax_hist.axvline(p3, color='black', linestyle='dotted')
-ax_hist.text(p2, 0.1, fr'${p2:.1f}^{{+{p3-p2:.1f}}}_{{-{p2-p1:.1f}}}\%$', fontsize=12, verticalalignment='top')
+ax_hist.legend()
 
-ax_box.boxplot(ape.flatten(), vert=False, autorange=False, widths=0.5, patch_artist=True, showfliers=False, boxprops=dict(facecolor='tomato'), medianprops=dict(color='black'))
+bplot = ax_box.boxplot(ape.T, vert=False, autorange=False, widths=0.5, patch_artist=True, showfliers=False, boxprops=dict(facecolor='tomato'), medianprops=dict(color='black'))
+for patch, color in zip(bplot['boxes'], colors):
+    patch.set_facecolor(color)
 ax_box.set(yticks=[])
 ax_box.spines['left'].set_visible(False)
 ax_box.spines['right'].set_visible(False)
