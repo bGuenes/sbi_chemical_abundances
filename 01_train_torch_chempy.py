@@ -13,7 +13,7 @@ import os
 
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
-path_training = os.path.dirname(__file__) + '/data/chempy_data/TNG_Training_Data.npz'
+path_training = os.path.dirname(__file__) + '/data/chempy_data/TNG_Train_Data.npz'
 training_data = np.load(path_training, mmap_mode='r')
 
 elements = training_data['elements']
