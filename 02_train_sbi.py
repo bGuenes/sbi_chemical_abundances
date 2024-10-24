@@ -118,7 +118,7 @@ print()
 # --- Load the validation data ---
 
 print("Evaluating the posterior...")
-path_test = file_path + '/data/chempy_data/TNG_Test_Data.npz'
+path_test = file_path + '/data/chempy_data/chempy_TNG_val_data.npz'
 val_data = np.load(path_test, mmap_mode='r')
 
 val_theta = val_data['params']

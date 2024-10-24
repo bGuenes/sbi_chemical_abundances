@@ -139,6 +139,7 @@ plt.xlabel('Epoch', fontsize=15)
 plt.ylabel('MSE Loss', fontsize=15)
 plt.title('Training and Validation Loss', fontsize=20)
 plt.legend()
+plt.tight_layout()
 plt.savefig("plots/loss_NN_simulator.png")
 plt.clf()
 
