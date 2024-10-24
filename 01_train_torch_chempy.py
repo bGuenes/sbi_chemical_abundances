@@ -13,7 +13,7 @@ import os
 
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
-path_training = os.path.dirname(__file__) + '/data/chempy_data/TNG_Train_Data.npz'
+path_training = os.path.dirname(__file__) + '/data/chempy_data/chempy_TNG_train_data.npz'
 training_data = np.load(path_training, mmap_mode='r')
 
 elements = training_data['elements']
@@ -22,7 +22,7 @@ train_y = training_data['abundances']
 
 
 # ---  Load in the validation data ---
-path_test = os.path.dirname(__file__) + '/data/chempy_data/TNG_Test_Data.npz'
+path_test = os.path.dirname(__file__) + '/data/chempy_data/chempy_TNG_val_data.npz'
 val_data = np.load(path_test, mmap_mode='r')
 
 val_x = val_data['params']

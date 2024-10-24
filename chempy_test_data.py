@@ -15,8 +15,8 @@ import time
 
 # ----- Set-Up -----------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Config ---
-name = "TNG_train_data" # name of the data file
-N_samples = int(5e4) # number of elements in test set
+name = "chempy_TNG_train_data" # name of the data file
+N_samples = int(5e5) # number of elements in test set
 
 # --- Define the yield tables ---
 yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'

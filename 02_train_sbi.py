@@ -191,7 +191,7 @@ ax_box.spines['top'].set_visible(False)
 fig.suptitle('APE of the Posterior', fontsize=20)
 plt.xlim(0, 100)
 fig.tight_layout()
-plt.savefig(file_path + '/data/APE_posterior.png')
+plt.savefig(file_path + '/data/ape_posterior2.png')
 plt.clf()
 
 
