@@ -17,7 +17,9 @@ from torch.distributions.uniform import Uniform
 import time as t
 import pickle
 import os
-import tqdm
+from tqdm import tqdm
+
+from plot_functions import *
 
 file_path = os.path.dirname(__file__)
 
@@ -79,7 +81,7 @@ start = t.time()
 # --- simulate the data ---
 print()
 print("Simulating data...")
-theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=1_000_000)
+theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=100_000)
 print(f"Genereted {len(theta)} samples")
 
 # --- add noise ---
@@ -106,7 +108,7 @@ print(f'Time taken to train the posterior with {len(theta)} samples: '
 
 
 # ----- Save the posterior -------------------------------------------------------------------------------------------------------------------------------------------
-with open('data/posterior_sbi_w5p-error_noH.pickle', 'wb') as f:
+with open('data/posterior_sbi_1e5_samples.pickle', 'wb') as f:
     pickle.dump(posterior, f)
 
 print()
@@ -116,7 +118,7 @@ print()
 
 # ----- Evaluate the posterior -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load the validation data ---
-
+# Validation data created with CHEMPY, not with the NN simulator
 print("Evaluating the posterior...")
 path_test = file_path + '/data/chempy_data/chempy_TNG_val_data.npz'
 val_data = np.load(path_test, mmap_mode='r')
@@ -140,14 +142,14 @@ def clean_data(x, y):
 
     return x, y
 
-val_theta, val_x     = clean_data(val_theta, val_x)
+val_theta, val_x = clean_data(val_theta, val_x)
 
 # convert to torch tensors
 val_theta = torch.tensor(val_theta, dtype=torch.float32)
 val_x = torch.tensor(val_x, dtype=torch.float32)
 abundances =  torch.cat([val_x[:,:2], val_x[:,3:]], dim=1)
 
-# add noise to data
+# add noise to data to simulate observational errors
 x_err = np.ones_like(abundances)*float(pc_ab)/100.
 abundances = norm.rvs(loc=abundances,scale=x_err)
 abundances = torch.tensor(abundances).float()
@@ -159,41 +161,13 @@ for index in tqdm(range(len(abundances))):
     theta_hat[index] = theta_predicted
 
 ape = torch.abs((val_theta - theta_hat) / val_theta) *100
+torch.save(ape, 'data/ape_posterior.pt')
 
 
 # --- Absolute percentage error plot ---
 
-fig, (ax_box, ax_hist) = plt.subplots(2, sharex=True, gridspec_kw={"height_ratios": (.20, .80)})
-colors = ["tomato", "skyblue", "olive", "gold", "teal", "orchid"]
-
-for i in range(6):
-    l_quantile, median, u_quantile = np.percentile(ape[:,i], [25, 50, 75])
-    ax_hist.hist(ape[:,i], bins=25, density=True, range=(0, 100), label=labels_in[i], color=colors[i], alpha=0.5)
-    median = np.percentile(ape[:,i], 50)
-    ax_hist.axvline(median, color=colors[i], linestyle='--')
-    print(labels_in[i] + f" : {median:.1f}% + {u_quantile-median:.1f} - {median-l_quantile:.1f}")
-    print()
-    
-ax_hist.set_xlabel('Error (%)', fontsize=15)
-ax_hist.set_ylabel('Density', fontsize=15)
-ax_hist.spines['top'].set_visible(False)
-ax_hist.spines['right'].set_visible(False)
-ax_hist.legend()
-
-bplot = ax_box.boxplot(ape.T, vert=False, autorange=False, widths=0.5, patch_artist=True, showfliers=False, boxprops=dict(facecolor='tomato'), medianprops=dict(color='black'))
-for patch, color in zip(bplot['boxes'], colors):
-    patch.set_facecolor(color)
-ax_box.set(yticks=[])
-ax_box.spines['left'].set_visible(False)
-ax_box.spines['right'].set_visible(False)
-ax_box.spines['top'].set_visible(False)
-
-fig.suptitle('APE of the Posterior', fontsize=20)
-plt.xlim(0, 100)
-fig.tight_layout()
-plt.savefig(file_path + '/data/ape_posterior2.png')
-plt.clf()
-
+save_path = file_path + '/plots/ape_posterior2_1e5.png'
+ape_plot(ape, labels_in, save_path)
 
 # --- Simulation based calibration plot ---
 
@@ -230,5 +204,5 @@ f, ax = sbc_rank_plot(
 
 f.suptitle("SBC rank plot", fontsize=36)
 plt.tight_layout()
-plt.savefig(file_path + '/plots/sbc_rank_plot.png')
+plt.savefig(file_path + '/plots/sbc_rank_plot_1e5.png')
 plt.clf()
