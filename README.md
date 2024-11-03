@@ -9,7 +9,7 @@ Our goal is to infer the global galactic parameters (initial mass function high-
 The data used to train the NN and NPE is created with $CHEMPY$ as simulator and the TNG yield set in [``` chempy_test_data.py ```](chempy_test_data.py). <br>
 
 <p align="center">
-  <img src="plots/sbi3.png" />
+  <img src="plots/sbi_overview.png" />
 </p>
 
 ## 1. Train NN
