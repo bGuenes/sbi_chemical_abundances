@@ -16,7 +16,7 @@ The data used to train the NN and NPE is created with $CHEMPY$ as simulator and 
 Firstly we train a neural network to learn the mapping from chemical abundances to galactic parameters. For this we use data created with $CHEMPY$ as simulator. <br>
 The NN is trained on $\sim 500,000$ data points and validated on $\sim 50,000$ data points. The batch size is set to $64$ and the learning rate is set to $0.001$ and trained for $20$ epochs. <br>
 The NN is a simple feed-forward neural network with $2$ hidden layers and $100$ neurons in the first and $40$ neurons in the second layer. <br>
-That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $1.6^{+2.4}_{-0.9}\%$ on the validation set is far below the error rate of real world data of $5\%$. <br>
+That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $1.6^{+2.4}_{-0.9}\\%$ on the validation set is far below the error rate of real world data of $5\\%$. <br>
 It took around $50s$ to train the NN on CPU. <br>
 
 <div style="display: flex; justify-content: space-between;">
@@ -29,7 +29,7 @@ Secondly we use the NN to train a Neural Posterior Estimator (NPE). <br>
 For that a total of $10^5$ datapoints simulated with the NN are used to train the NPE until it converges.
 This takes approximatley $11$ minutes on CPU. <br>
 The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. Each observation is sampled $1000$ times and the mean is compared to the ground truth. <br>
-The NPE is has an absolute percantage error (APE) of $9.1^{+16.6}_{-6.2}\%$ for a single prediction. <br>
+The NPE is has an absolute percantage error (APE) of $9.1^{+16.6}_{-6.2}\\%$ for a single prediction. <br>
 
 <div style="display: flex; justify-content: space-between;">
   <img src="plots/sbc_rank_plot_1e5.png" style="width: 49%;"/>
@@ -61,7 +61,7 @@ The posterior trained above was also tested with data created with an alternativ
 | AGB | Karakas & Lugaro (2016) |
 
 We can see, that the predicted values are off from the ground truth. This is due to the fact that the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
-However, the deviation is not that high with an error of $\Delta\alpha_{IMF}=3.7\%$ and $\Delta log_{10}N_{Ia}=6.3\%$.
+However, the deviation is not that high with an error of $\Delta\alpha_{IMF}=3.7\\%$ and $\Delta log_{10}N_{Ia}=6.3\\%$.
 
 <div style="display: flex; justify-content: space-between;">
   <img src="plots/sbi_Nstar_analysis_alt.png" style="width: 80%;"/>
@@ -71,7 +71,7 @@ However, the deviation is not that high with an error of $\Delta\alpha_{IMF}=3.7
 ### TNG simulation data
 We also tested the posterior trained above with data created with the TNG simulator.
 The prediction is still a bit off from the ground truth, even though the NN was trained on $CHEMPY$ data created with the TNG yield set. <br>
-However, the errors are still in an acceptable range with $\Delta\alpha_{IMF}=1.3\%$ and $\Delta log_{10}N_{Ia}=0.8\%$.
+However, the errors are still in an acceptable range with $\Delta\alpha_{IMF}=1.3\\%$ and $\Delta log_{10}N_{Ia}=0.8\\%$.
 <div style="display: flex; justify-content: space-between;">
   <img src="plots/sbi_Nstar_analysis_tng.png" style="width: 80%;"/>
   <img src="plots/sbi_1000stars_noise_tng.png" style="width: 19%;"/>
