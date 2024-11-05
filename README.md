@@ -45,12 +45,34 @@ The NPE is then used to infer the global galactic parameters. <br>
 As expected, the inferred parameters deviate from the ground truth, since the NPE has a high error rate for a single prediction, but is able to infer the global parameters with a high accuracy for a growing number of stars. <br>
 The total inference time for the $1000$ stars is around $1$ minute.
 
-<p align="center">
-  <img src="plots/sbi_Nstar_comp.png" />
-</p>
+<div style="display: flex; justify-content: space-between;">
+  <img src="plots/sbi_Nstar_comp.png" style="width: 80%;"/>
+  <img src="plots/sbi_1000stars_noise.png" style="width: 19%;"/>
+</div>
 
 We can see that the estimated parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$ can be predicted with a high accuracy in a reasonable time compared to traditional MCMC methods. <br>
 
-<p align="center">
-  <img src="plots/sbi_1000stars_noise.png" style="width: 50%" />
-</p>
+### CHEMPY alternative yield set
+The posterior trained above was also tested with data created with an alternative yield set in the $CHEMPY$ simulator.
+| Type | Yield Table |
+| --- | --- |
+| SN Ia | Thielemann et al. (2003) |
+| SN II | Nomoto et al. (2013) |
+| AGB | Karakas & Lugaro (2016) |
+
+We can see, that the predicted values are off from the ground truth. This is due to the fact that the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
+However, the deviation is not that high with an error of $\Delta\alpha_{IMF}=3.7\%$ and $\Delta log_{10}N_{Ia}=6.3\%$.
+
+<div style="display: flex; justify-content: space-between;">
+  <img src="plots/sbi_Nstar_analysis_alt.png" style="width: 80%;"/>
+  <img src="plots/sbi_1000stars_noise_alt.png" style="width: 19%;"/>
+</div>
+
+### TNG simulation data
+We also tested the posterior trained above with data created with the TNG simulator.
+The prediction is still a bit off from the ground truth, even though the NN was trained on $CHEMPY$ data created with the TNG yield set. <br>
+However, the errors are still in an acceptable range with $\Delta\alpha_{IMF}=1.3\%$ and $\Delta log_{10}N_{Ia}=0.8\%$.
+<div style="display: flex; justify-content: space-between;">
+  <img src="plots/sbi_Nstar_analysis_tng.png" style="width: 80%;"/>
+  <img src="plots/sbi_1000stars_noise_tng.png" style="width: 19%;"/>
+</div>

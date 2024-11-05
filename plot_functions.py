@@ -226,11 +226,13 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
 
         ax.axhline(x_true, color='k', linestyle=':', linewidth=2, label='Ground Truth')
 
-        ax.set_xlabel(r'$N_{\rm stars}$', fontsize=20)
-        ax.set_ylabel(name, fontsize=20)
-        ax.set_ylim([x_true-0.1*abs(x_true), x_true+0.1*abs(x_true)])
+        ax.set_xlabel(r'$N_{\rm stars}$', fontsize=40)
+        ax.set_ylabel(name, fontsize=40)
+        ax.set_ylim([x_true-0.2*abs(x_true), x_true+0.2*abs(x_true)])
         ax.set_xscale('log')
         ax.set_xlim([1,1000])
+        ax.tick_params(labelsize=30, size=10, width=3)
+        ax.tick_params(which='minor', size=5, width=2)
 
     for i, name in enumerate([r'$\alpha_{\rm IMF}$', r'$\log_{10} N_{\rm Ia}$']):
         plot(fit[:,i], err[:,i], x_true[i], ax[i], name)
