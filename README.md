@@ -38,41 +38,49 @@ The NPE is has an absolute percantage error (APE) of $9.1^{+16.6}_{-6.2}\\%$ for
 
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
-## 3. Sample from Posterior
+## 3. Inference
+
 Finally we sample from the posterior distribution to infer the global galactic parameters. <br>
-For that we use the chemical abundances of $1000$ stars from the same galaxy created with the NN. We used $\alpha_{IMF} = -2.3$ and $log_{10}N_{Ia} = -2.89$ and draw the local parameters from the prior distributions. <br>
-The NPE is then used to infer the global galactic parameters. <br>
-As expected, the inferred parameters deviate from the ground truth, since the NPE has a high error rate for a single prediction, but is able to infer the global parameters with a high accuracy for a growing number of stars. <br>
-The total inference time for the $1000$ stars is around $1$ minute.
+For that we use the chemical abundances of $1000$ stars from the same galaxy (meaning they have the same galactic parameters $\Lambda$) and the local parameters $\Theta_i$ are sampled from the priors.
+The galactic parameters were fixed to  $\alpha_{IMF} = -2.3$ and $log_{10}N_{Ia} = -2.89$. <br>
+The first set is created with the NN trained on data created with the TNG yield set. <br>
+The second set is created from $CHEMPY$ directly with an alternative yield set. <br>
+The third set is data created with the TNG simulator. <br>
 
-<div style="display: flex; justify-content: space-between;">
-  <img src="plots/sbi_Nstar_comp.png" style="width: 80%;"/>
-  <img src="plots/sbi_1000stars_noise.png" style="width: 19%;"/>
-</div>
+### TNG yield set
+<p align="center">
+  <img src="plots/sbi_Nstar_comp.png" />
+</p>
 
-We can see that the estimated parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$ can be predicted with a high accuracy in a reasonable time compared to traditional MCMC methods. <br>
-
-### CHEMPY alternative yield set
-The posterior trained above was also tested with data created with an alternative yield set in the $CHEMPY$ simulator.
-| Type | Yield Table |
-| --- | --- |
-| SN Ia | Thielemann et al. (2003) |
-| SN II | Nomoto et al. (2013) |
-| AGB | Karakas & Lugaro (2016) |
-
-We can see, that the predicted values are off from the ground truth. This is due to the fact that the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
-However, the deviation is not that high with an error of $\Delta\alpha_{IMF}=3.7\\%$ and $\Delta log_{10}N_{Ia}=6.3\\%$.
-
-<div style="display: flex; justify-content: space-between;">
-  <img src="plots/sbi_Nstar_analysis_alt.png" style="width: 80%;"/>
-  <img src="plots/sbi_1000stars_noise_alt.png" style="width: 19%;"/>
-</div>
+### Alternative yield set
+<p align="center">
+  <img src="plots/sbi_Nstar_analysis_alt.png" />
+</p>
 
 ### TNG simulation data
-We also tested the posterior trained above with data created with the TNG simulator.
-The prediction is still a bit off from the ground truth, even though the NN was trained on $CHEMPY$ data created with the TNG yield set. <br>
-However, the errors are still in an acceptable range with $\Delta\alpha_{IMF}=1.3\\%$ and $\Delta log_{10}N_{Ia}=0.8\\%$.
+<p align="center">
+  <img src="plots/sbi_Nstar_analysis_tng.png" />
+</p>
+
 <div style="display: flex; justify-content: space-between;">
-  <img src="plots/sbi_Nstar_analysis_tng.png" style="width: 80%;"/>
-  <img src="plots/sbi_1000stars_noise_tng.png" style="width: 19%;"/>
+  <img src="plots/sbi_1000stars_noise.png" style="width: 33%;"/>
+  <img src="plots/sbi_1000stars_noise_alt.png" style="width: 33%;"/>
+  <img src="plots/sbi_1000stars_noise_tng.png" style="width: 33%;"/>
 </div>
+
+| | $CHEMPY$ TNG yield set | $CHEMPY$ Alternative yield set | TNG simulation data |
+|---|---|---|---|
+| SN Ia | TNG_net | Thielemann et al. (2003) |
+| SN II | TNG_net | Nomoto et al. (2013) |
+| AGB | TNG | Karakas & Lugaro (2016) |
+| $\alpha_{IMF}$ | $-2.294 \pm 0.003$ | $-2.385 \pm 0.003$ | $-2.270 \pm 0.005$ |
+|$\log_{10}N_{Ia}$| $-2.888 \pm 0.005$ | $-3.072 \pm 0.007$ | $-2.913 \pm 0.006$ |
+| $\Delta\alpha_{IMF}$ | $0.26\\% $ | $3.7\\%$ | $1.3\\%$ |
+| $\Delta\log_{10}N_{Ia}$ | $0.07\\%$ | $6.3\\%$ | $0.8\\%$ |
+
+As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
+but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set
+that the posterior was trained on. 
+The prediction for the TNG simulator seems also to be quite close to the ground truth. <br>
+The deviation is higher for the alternative yield set, since the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
+The total inference time for $1000$ simulations for the $1000$ stars is around $1$ minute for each yield set and therefore in a reasonable range compared to traditional MCMC methods. <br>
