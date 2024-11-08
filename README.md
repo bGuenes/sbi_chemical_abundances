@@ -30,14 +30,13 @@ The network is a masked autoregressive flow (MAF) with $10$ hidden features and 
 For that a total of $10^5$ datapoints simulated with the NN are used to train the NPE until it converges.
 This takes approximatley $10$ minutes on multiple CPUs. <br>
 The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. Each observation is sampled $1000$ times and the mean is compared to the ground truth. <br>
-The NPE is has an absolute percantage error (APE) of $14.4^{+16.6}_{-8.1}\\%$ for a single prediction. <br>
+The NPE is has an absolute percantage error (APE) of $14.4^{+16.6}_{-8.1}\\%$ for a single prediction and around $7\\%$ for the global parameters $\Lambda$, which we are interested in.<br>
+The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
 <div style="display: flex; justify-content: space-between;">
   <img src="plots/sbc_rank_plot_NPE_C.png" style="width: 49%;"/>
   <img src="plots/ape_posterior_NPE_C.png" style="width: 49%;"/>
 </div>
-
-The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
 ## 3. Inference
 
@@ -85,4 +84,4 @@ that the posterior was trained on.
 The prediction for the TNG simulator seems also to be quite close to the ground truth. <br>
 The deviation is higher for the alternative yield set, since the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
 The total inference time for $1000$ simulations for the $1000$ stars is around $10$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
-The total time from data creation with the simulator to the final inference is around half an hour. <br>
+The total time from data creation with the simulator to the final inference is less than an hour. <br>
