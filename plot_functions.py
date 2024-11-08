@@ -56,7 +56,7 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
 ##########################################################################################################
 # --- 2D Histogram preparation ---
 def hist_2d_prep(x1, x2, x_true, N_stars):
-    x_lim, y_lim = [-2.8,-1.8],[-3.4,-2.4]
+    x_lim, y_lim = [-3,-1.6],[-3.6,-2.2]
 
     # --- Fit a 2D Gaussian to the data ---
     mean_1, err_1, std_1 = mean_error(x1, int(N_stars))
@@ -103,8 +103,12 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
     # draw contour lines on1,2,3 sigma
     CS = plt.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
     text = plt.clabel(CS, inline=True, fontsize=10)
-    for i in range(len(sigma)):
-        text[i].set(text=f'{sigma[i]} $\\sigma$')
+
+    rd_levels = [str(round(n,3)) for n in levels]
+    for t in text:
+        i = rd_levels.index(t._text)
+        s = sigma[i]
+        t.set(text=f'{s} $\\sigma$')
 
     legend_true = plt.scatter(x_true[0], x_true[1], color='r', s=10, label=label_gt)
     legend_fit = plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
@@ -162,8 +166,12 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     # draw contour lines on sigma levels
     CS = axTemperature.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
     text = axTemperature.clabel(CS, inline=True, fontsize=15)
-    for i in range(len(sigma)):
-        text[i].set(text=f'{sigma[i]} $\\sigma$')
+
+    rd_levels = [str(round(n,3)) for n in levels]
+    for t in text:
+        i = rd_levels.index(t._text)
+        s = sigma[i]
+        t.set(text=f'{s} $\\sigma$')
 
     # labels
     label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[1].item(), 2)}$'

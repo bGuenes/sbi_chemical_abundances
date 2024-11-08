@@ -26,14 +26,15 @@ It took around $50s$ to train the NN on CPU. <br>
 
 ## 2. Train SBI
 Secondly we use the NN to train a Neural Posterior Estimator (NPE). <br>
+The network is a masked autoregressive flow (MAF) with $10$ hidden features and $1$ transform. <br>
 For that a total of $10^5$ datapoints simulated with the NN are used to train the NPE until it converges.
-This takes approximatley $11$ minutes on CPU. <br>
+This takes approximatley $10$ minutes on multiple CPUs. <br>
 The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. Each observation is sampled $1000$ times and the mean is compared to the ground truth. <br>
-The NPE is has an absolute percantage error (APE) of $9.1^{+16.6}_{-6.2}\\%$ for a single prediction. <br>
+The NPE is has an absolute percantage error (APE) of $14.4^{+16.6}_{-8.1}\\%$ for a single prediction. <br>
 
 <div style="display: flex; justify-content: space-between;">
-  <img src="plots/sbc_rank_plot_1e5.png" style="width: 49%;"/>
-  <img src="plots/ape_posterior2_1e5.png" style="width: 49%;"/>
+  <img src="plots/sbc_rank_plot_NPE_C.png" style="width: 49%;"/>
+  <img src="plots/ape_posterior_NPE_C.png" style="width: 49%;"/>
 </div>
 
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
@@ -73,14 +74,15 @@ The third set is data created with the TNG simulator. <br>
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
-| $\alpha_{IMF}$ | $-2.294 \pm 0.003$ | $-2.385 \pm 0.003$ | $-2.270 \pm 0.005$ |
-|$\log_{10}N_{Ia}$| $-2.888 \pm 0.005$ | $-3.072 \pm 0.007$ | $-2.913 \pm 0.006$ |
-| $\Delta\alpha_{IMF}$ | $0.26\\% $ | $3.7\\%$ | $1.3\\%$ |
-| $\Delta\log_{10}N_{Ia}$ | $0.07\\%$ | $6.3\\%$ | $0.8\\%$ |
+| $\alpha_{IMF}$ | $-2.297 \pm 0.009$ | $-2.274 \pm 0.009$ | $-2.311 \pm 0.009$ |
+|$\log_{10}N_{Ia}$| $-2.893 \pm 0.01$ | $-2.933 \pm 0.01$ | $-2.943 \pm 0.011$ |
+| $\Delta\alpha_{IMF}$ | $0.1\\% $ | $0.9\\%$ | $0.5\\%$ |
+| $\Delta\log_{10}N_{Ia}$ | $0.1\\%$ | $1.5\\%$ | $1.8\\%$ |
 
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set
 that the posterior was trained on. 
 The prediction for the TNG simulator seems also to be quite close to the ground truth. <br>
 The deviation is higher for the alternative yield set, since the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
-The total inference time for $1000$ simulations for the $1000$ stars is around $1$ minute for each yield set and therefore in a reasonable range compared to traditional MCMC methods. <br>
+The total inference time for $1000$ simulations for the $1000$ stars is around $10$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
+The total time from data creation with the simulator to the final inference is around half an hour. <br>

@@ -6,9 +6,10 @@ from Chempy.parameter import ModelParameters
 
 import sbi.utils as utils
 from sbi.utils.user_input_checks import check_sbi_inputs, process_prior, process_simulator
-from sbi.inference import NPE, simulate_for_sbi
+from sbi.inference import NPE, simulate_for_sbi, NPE_C
 from sbi.analysis.plot import sbc_rank_plot
 from sbi.diagnostics import check_sbc, check_tarp, run_sbc, run_tarp
+from sbi.neural_nets import posterior_nn
 
 import torch
 from torch.distributions.normal import Normal
@@ -21,7 +22,10 @@ from tqdm import tqdm
 
 from plot_functions import *
 
+# ----- Config -------------------------------------------------------------------------------------------------------------------------------------------
+
 file_path = os.path.dirname(__file__)
+name = "NPE_C"
 
 # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Define the prior ---
@@ -74,7 +78,8 @@ check_sbi_inputs(simulator, prior)
 
 
 # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
-inference = NPE(prior=prior, show_progress_bars=True)
+density_estimator_build_fun = posterior_nn(model="maf", hidden_features=10, num_transforms=1, blocks=1)
+inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True)
 
 start = t.time()
 
@@ -108,7 +113,7 @@ print(f'Time taken to train the posterior with {len(theta)} samples: '
 
 
 # ----- Save the posterior -------------------------------------------------------------------------------------------------------------------------------------------
-with open('data/posterior_sbi_1e5_samples.pickle', 'wb') as f:
+with open(f'data/posterior_{name}.pickle', 'wb') as f:
     pickle.dump(posterior, f)
 
 print()
@@ -161,12 +166,12 @@ for index in tqdm(range(len(abundances))):
     theta_hat[index] = theta_predicted
 
 ape = torch.abs((val_theta - theta_hat) / val_theta) *100
-torch.save(ape, 'data/ape_posterior.pt')
+torch.save(ape, f'data/ape_posterior_{name}.pt')
 
 
 # --- Absolute percentage error plot ---
 
-save_path = file_path + '/plots/ape_posterior2_1e5.png'
+save_path = file_path + f'/plots/ape_posterior_{name}.png'
 ape_plot(ape, labels_in, save_path)
 
 # --- Simulation based calibration plot ---
@@ -204,5 +209,5 @@ f, ax = sbc_rank_plot(
 
 f.suptitle("SBC rank plot", fontsize=36)
 plt.tight_layout()
-plt.savefig(file_path + '/plots/sbc_rank_plot_1e5.png')
+plt.savefig(file_path + f'/plots/sbc_rank_plot_{name}.png')
 plt.clf()
