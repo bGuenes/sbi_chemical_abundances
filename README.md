@@ -30,7 +30,7 @@ The network is a masked autoregressive flow (MAF) with $10$ hidden features and 
 For that a total of $10^5$ datapoints simulated with the NN are used to train the NPE until it converges.
 This takes approximatley $10$ minutes on multiple CPUs. <br>
 The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. Each observation is sampled $1000$ times and the mean is compared to the ground truth. <br>
-The NPE is has an absolute percantage error (APE) of $14.4^{+16.6}_{-8.1}\\%$ for a single prediction and around $7\\%$ for the global parameters $\Lambda$, which we are interested in.<br>
+The NPE is has an absolute percantage error (APE) of $14.4^{+16.6}_{-8.1}\%$ for a single prediction and around $7\%$ for the global parameters $\Lambda$, which we are interested in.<br>
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
 <div style="display: flex; justify-content: space-between;">
