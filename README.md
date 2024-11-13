@@ -19,10 +19,10 @@ The NN is a simple feed-forward neural network with $2$ hidden layers and $100$ 
 That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $1.6^{+2.4}_{-0.9}\\%$ on the validation set is far below the error rate of real world data of $5\\%$. <br>
 It took around $50s$ to train the NN on CPU. <br>
 
-<div style="display: flex; justify-content: space-between;">
-  <img src="plots/loss_NN_simulator.png" style="width: 49%;"/>
-  <img src="plots/ape_NN.png" style="width: 49%;"/>
-</div>
+|||
+:-------------------------:|:-------------------------:
+![](plots/loss_NN_simulator.png)  |  ![](plots/ape_NN.png)
+
 
 ## 2. Train SBI
 Secondly we use the NN to train a Neural Posterior Estimator (NPE). <br>
@@ -37,6 +37,7 @@ The accuracy for a single prediction of the parameters is not really high. That'
   <img src="plots/sbc_rank_plot_NPE_C.png" style="width: 49%;"/>
   <img src="plots/ape_posterior_NPE_C.png" style="width: 49%;"/>
 </div>
+
 
 ## 3. Inference
 
@@ -62,14 +63,9 @@ The third set is data created with the TNG simulator. <br>
   <img src="plots/sbi_Nstar_analysis_tng.png" />
 </p>
 
-<div style="display: flex; justify-content: space-between;">
-  <img src="plots/sbi_1000stars_noise.png" style="width: 33%;"/>
-  <img src="plots/sbi_1000stars_noise_alt.png" style="width: 33%;"/>
-  <img src="plots/sbi_1000stars_noise_tng.png" style="width: 33%;"/>
-</div>
-
 | | $CHEMPY$ TNG yield set | $CHEMPY$ Alternative yield set | TNG simulation data |
-|---|---|---|---|
+:---:|:---:|:---:|:---:
+||![](plots/sbi_1000stars_noise.png)  |  ![](plots/sbi_1000stars_noise_alt.png) | ![](plots/sbi_1000stars_noise_tng.png)
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
