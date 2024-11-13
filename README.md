@@ -64,7 +64,7 @@ The third set is data created with the TNG simulator. <br>
 </p>
 
 | | $CHEMPY$ TNG yield set | $CHEMPY$ Alternative yield set | TNG simulation data |
-:---:|:---:|:---:|:---:
+---|---|---|---
 ||![](plots/sbi_1000stars_noise.png)  |  ![](plots/sbi_1000stars_noise_alt.png) | ![](plots/sbi_1000stars_noise_tng.png)
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
