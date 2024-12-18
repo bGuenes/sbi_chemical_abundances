@@ -16,7 +16,7 @@ The data used to train the NN and NPE is created with $CHEMPY$ as simulator and 
 Firstly we train a neural network to learn the mapping from chemical abundances to galactic parameters. For this we use data created with $CHEMPY$ as simulator. <br>
 The NN is trained on $\sim 500,000$ data points and validated on $\sim 50,000$ data points. The batch size is set to $64$ and the learning rate is set to $0.001$ and trained for $20$ epochs. <br>
 The NN is a simple feed-forward neural network with $2$ hidden layers and $100$ neurons in the first and $40$ neurons in the second layer. <br>
-That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $1.6^{+2.4}_{-0.9}\\%$ on the validation set is far below the error rate of real world data of $5\\%$. <br>
+That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $1.3^{+1.6}_{-0.7}\\%$ on the validation set is far below the error rate of real world data of $5\\%$. <br>
 It took around $50s$ to train the NN on CPU. <br>
 
 |||
