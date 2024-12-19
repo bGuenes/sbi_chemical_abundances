@@ -7,11 +7,12 @@ from scipy.stats import multivariate_normal
 ##########################################################################################################
 # --- Calculate mean and error ---
 def mean_error(x, N_stars):
-    mean = np.mean(x)
+    all_means = x.reshape(N_stars, -1).mean(axis=1) # Mean of stars
+    mean = np.mean(x) # Mean of means
     std = np.std(x)
     err = std/np.sqrt(N_stars)
 
-    return mean, err, std
+    return all_means, mean, err, std
 
 ##########################################################################################################
 # --- Plot 1D Histogram ---
@@ -21,7 +22,7 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
     
     def plot_subplot(i, x, true, name):
         N_stars = int(len(x)/simulations)
-        mean, err, std = mean_error(x, N_stars)
+        _, mean, err, std = mean_error(x, N_stars)
 
         # Set the x-axis limits
         x_min = true - plot_width*true
@@ -56,11 +57,11 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
 ##########################################################################################################
 # --- 2D Histogram preparation ---
 def hist_2d_prep(x1, x2, x_true, N_stars):
-    x_lim, y_lim = [-3,-1.6],[-3.6,-2.2]
+    x_lim, y_lim = [-2.5,-2.1],[-3.1,-2.7]
 
     # --- Fit a 2D Gaussian to the data ---
-    mean_1, err_1, std_1 = mean_error(x1, int(N_stars))
-    mean_2, err_2, std_2 = mean_error(x2, int(N_stars))
+    all_means_1, mean_1, err_1, std_1 = mean_error(x1, int(N_stars))
+    all_means_2, mean_2, err_2, std_2 = mean_error(x2, int(N_stars))
 
     
     x = np.linspace(x_lim[0], x_lim[1], 1000)
@@ -72,7 +73,7 @@ def hist_2d_prep(x1, x2, x_true, N_stars):
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
 
-    popt, pcov = multivariate_normal.fit(np.array([x1, x2]).T)
+    popt, pcov = multivariate_normal.fit(np.array([all_means_1, all_means_2]).T)
     rv = multivariate_normal(popt, pcov)
 
 
@@ -80,15 +81,15 @@ def hist_2d_prep(x1, x2, x_true, N_stars):
     levels =[]
     sigma = [3,2,1]
     for n in sigma:
-        level = rv.pdf(popt+n * np.array([std_1, std_2]))
+        level = rv.pdf(popt+n * np.array([err_1, err_2]))
         levels.append(level)
 
-    return  x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2
+    return  x_lim, y_lim, X, Y, pos, rv, levels, sigma, all_means_1, mean_1, err_1, std_1, all_means_2, mean_2, err_2, std_2
 
 ##########################################################################################################
 # --- Plot 2D Histogram ---
 def plot_2d_hist(x1, x2, x_true, N_stars):
-    x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
+    x_lim, y_lim, X, Y, pos, rv, levels, sigma, all_means_1, mean_1, err_1, std_1, all_means_2, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
 
     # labels
     label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[1].item(), 2)}$'
@@ -98,19 +99,19 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
 
     # --- Plot the data ---
     plt.figure(figsize=(15,15))
-    plt.hist2d(x1, x2, bins=500, range=[x_lim, y_lim])
+    plt.hist2d(all_means_1, all_means_2, bins=100, range=[x_lim, y_lim])
 
     # draw contour lines on1,2,3 sigma
     CS = plt.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
     text = plt.clabel(CS, inline=True, fontsize=10)
 
-    rd_levels = [str(round(n,3)) for n in levels]
+    rd_levels = [str(int(n)) for n in levels]
     for t in text:
-        i = rd_levels.index(t._text)
+        i = rd_levels.index(t._text.split(".",1)[0])
         s = sigma[i]
         t.set(text=f'{s} $\\sigma$')
 
-    legend_true = plt.scatter(x_true[0], x_true[1], color='r', s=10, label=label_gt)
+    legend_true = plt.scatter(x_true[0], x_true[1], color='r', s=20, label=label_gt)
     legend_fit = plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
     legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
@@ -127,7 +128,7 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
 ##########################################################################################################
 # --- Plot 2D Histogram with side plots ---
 def plot_2d_hist_sides(x1, x2, x_true, N_stars):
-    x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
+    x_lim, y_lim, X, Y, pos, rv, levels, sigma, all_means_1, mean_1, err_1, std_1, all_means_2, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
 
     x = np.linspace(x_lim[0], x_lim[1], 1000)
     y = np.linspace(y_lim[0], y_lim[1], 1000)
@@ -161,15 +162,15 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
 
 
     # Plot the data
-    axTemperature.hist2d(x1, x2, bins=500, range=[x_lim, y_lim])
+    axTemperature.hist2d(all_means_1, all_means_2, bins=100, range=[x_lim, y_lim])
 
     # draw contour lines on sigma levels
     CS = axTemperature.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
     text = axTemperature.clabel(CS, inline=True, fontsize=15)
 
-    rd_levels = [str(round(n,3)) for n in levels]
+    rd_levels = [str(int(n)) for n in levels]
     for t in text:
-        i = rd_levels.index(t._text)
+        i = rd_levels.index(t._text.split(".",1)[0])
         s = sigma[i]
         t.set(text=f'{s} $\\sigma$')
 
@@ -179,7 +180,7 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(mean_1.item(), 3)} \\pm {round(err_1.item(),3)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(mean_2.item(), 3)} \\pm {round(err_2.item(),3)}$'
     
     # plot the ground truth and the fit
-    legend_true = axTemperature.scatter(x_true[0], x_true[1], color='r', label=label_gt, s=10)
+    legend_true = axTemperature.scatter(x_true[0], x_true[1], color='r', label=label_gt, s=20)
     legend_fit = axTemperature.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
     axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
@@ -187,11 +188,11 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     axTemperature.tick_params(labelsize=30)
 
     # plot the histograms
-    axHistx.hist(x1, bins=500, density=True, alpha=0.6, color='g')
-    axHisty.hist(x2, bins=500, density=True, alpha=0.6, color='g', orientation='horizontal')
+    axHistx.hist(all_means_1, bins=500, density=True, alpha=0.6, color='g')
+    axHisty.hist(all_means_2, bins=500, density=True, alpha=0.6, color='g', orientation='horizontal')
 
-    axHistx.plot(x, norm.pdf(x, mean_1, std_1), 'k', linewidth=2)
-    axHisty.plot(norm.pdf(y, mean_2, std_2), y, 'k', linewidth=2)
+    axHistx.plot(x, norm.pdf(x, mean_1, err_1), 'k', linewidth=2)
+    axHisty.plot(norm.pdf(y, mean_2, err_2), y, 'k', linewidth=2)
 
     axHistx.axvline(x=x_true[0], color='r', linestyle='dashed', linewidth=2)
     axHisty.axhline(y=x_true[1], color='r', linestyle='dashed', linewidth=2)
@@ -214,8 +215,8 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
     for n in no_stars:
         samples = int(n*simulations)
         N_stars = int(samples/simulations)
-        mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
-        mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
+        _, mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
+        _, mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
 
         fit.append([mean_1, mean_2])
         err.append([err_1, err_2])
@@ -279,8 +280,8 @@ def n_stars_plot_comp(x1, x2, x_true, dat, no_stars= np.array([1, 10, 100, 500, 
     for n in no_stars:
         samples = int(n*simulations)
         N_stars = int(samples/simulations)
-        mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
-        mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
+        _, mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
+        _, mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
 
         fit.append([mean_1, mean_2])
         err.append([err_1, err_2])
