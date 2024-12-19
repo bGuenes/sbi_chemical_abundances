@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 from scipy.stats import norm
@@ -99,11 +100,12 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
 
     # --- Plot the data ---
     plt.figure(figsize=(15,15))
-    plt.hist2d(all_means_1, all_means_2, bins=100, range=[x_lim, y_lim])
+    plt.hist2d(all_means_1, all_means_2, bins=20, range=[x_lim, y_lim])
+    plt.tick_params(labelsize=30)
 
     # draw contour lines on1,2,3 sigma
     CS = plt.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
-    text = plt.clabel(CS, inline=True, fontsize=10)
+    text = plt.clabel(CS, inline=True, fontsize=15)
 
     rd_levels = [str(int(n)) for n in levels]
     for t in text:
@@ -112,7 +114,7 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
         t.set(text=f'{s} $\\sigma$')
 
     legend_true = plt.scatter(x_true[0], x_true[1], color='r', s=20, label=label_gt)
-    legend_fit = plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
+    legend_fit = plt.scatter(mean_1, mean_2, color='k', label=label_fit, s=20) #plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
     legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
     legend_true = plt.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.99))
@@ -120,8 +122,8 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
     plt.gca().add_artist(legend_fit)
     plt.gca().add_artist(legend_true)
 
-    plt.xlabel(r'$\alpha_{\rm IMF}$', fontsize=20)
-    plt.ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=20)
+    plt.xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
+    plt.ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=40)
     #plt.legend(fontsize=15, shadow=True, fancybox=True, loc=2,)
     plt.show()
 
@@ -162,7 +164,7 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
 
 
     # Plot the data
-    axTemperature.hist2d(all_means_1, all_means_2, bins=100, range=[x_lim, y_lim])
+    axTemperature.hist2d(all_means_1, all_means_2, bins=20, range=[x_lim, y_lim])
 
     # draw contour lines on sigma levels
     CS = axTemperature.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
@@ -181,21 +183,24 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     
     # plot the ground truth and the fit
     legend_true = axTemperature.scatter(x_true[0], x_true[1], color='r', label=label_gt, s=20)
-    legend_fit = axTemperature.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
+    legend_fit = axTemperature.scatter(mean_1, mean_2, color='k', label=label_fit, s=20) #axTemperature.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
     axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
     axTemperature.set_ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=40)
     axTemperature.tick_params(labelsize=30)
 
     # plot the histograms
-    axHistx.hist(all_means_1, bins=500, density=True, alpha=0.6, color='g')
-    axHisty.hist(all_means_2, bins=500, density=True, alpha=0.6, color='g', orientation='horizontal')
+    axHistx.hist(all_means_1, bins=50, density=True, alpha=0.9, color=matplotlib.colormaps["viridis"](0))
+    axHisty.hist(all_means_2, bins=50, density=True, alpha=0.9, color=matplotlib.colormaps["viridis"](0), orientation='horizontal')
 
-    axHistx.plot(x, norm.pdf(x, mean_1, err_1), 'k', linewidth=2)
-    axHisty.plot(norm.pdf(y, mean_2, err_2), y, 'k', linewidth=2)
+    #axHistx.plot(x, norm.pdf(x, mean_1, err_1), 'k', linewidth=2)
+    #axHisty.plot(norm.pdf(y, mean_2, err_2), y, 'k', linewidth=2)
 
     axHistx.axvline(x=x_true[0], color='r', linestyle='dashed', linewidth=2)
     axHisty.axhline(y=x_true[1], color='r', linestyle='dashed', linewidth=2)
+
+    axHistx.axvline(x=mean_1, color='k', linestyle='dashed', linewidth=2)
+    axHisty.axhline(y=mean_2, color='k', linestyle='dashed', linewidth=2)
 
     axHistx.set_xlim(x_lim)
     axHisty.set_ylim(y_lim)    
