@@ -56,7 +56,7 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
 ##########################################################################################################
 # --- 2D Histogram preparation ---
 def hist_2d_prep(x1, x2, x_true, N_stars):
-    x_lim, y_lim = [-3,-1.6],[-3.6,-2.2]
+    x_lim, y_lim = [-2.35,-2.25],[-2.95,-2.80]
 
     # --- Fit a 2D Gaussian to the data ---
     mean_1, err_1, std_1 = mean_error(x1, int(N_stars))
@@ -104,9 +104,10 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
     CS = plt.contour(X, Y, rv.pdf(pos), levels=levels, colors='k', linestyles='dashed')
     text = plt.clabel(CS, inline=True, fontsize=10)
 
-    rd_levels = [str(round(n,3)) for n in levels]
+    rd_levels = [str(round(n,2)) for n in levels]
     for t in text:
-        i = rd_levels.index(t._text)
+        #i = rd_levels.index(t._text)
+        i = (np.array(levels) - float(t._text)).argmin()
         s = sigma[i]
         t.set(text=f'{s} $\\sigma$')
 
