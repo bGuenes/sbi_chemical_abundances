@@ -48,31 +48,52 @@ The first set is created with the NN trained on data created with the TNG yield 
 The second set is created from $CHEMPY$ directly with an alternative yield set. <br>
 The third set is data created with the TNG simulator. <br>
 
-### TNG yield set
+## 4. Multistar Posterior
+We can compute the posterior for a single star from the samples from the NPE. <br>
+Because of the central limit theorem, we can write the posterior for a single star as a multivariate Gaussian. <br>
+This gives us the mean and covariance of $\alpha_{IMF}$ and $log{N_{Ia}}$ for one observation. <br>
+
+We can then combine the posterior for multiple stars to get the posterior for the entire dataset. <br>
+$$ 
+\begin{align*}
+P(\theta| data) &\propto \prod_{i=1}^{N_{stars}} P(\theta| obs_i) \\ \\
+&\propto \prod_{i=1}^{N_{stars}} \exp\left(-\frac{1}{2} \frac{(\theta-\mu_i)^2}{\sigma_i^2}\right)
+\end{align*} 
+$$
+
+This is a product of Gaussians, so the posterior for the entire dataset is also a Gaussian with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$. <br>
+$$
+\begin{align*}
+\mathbf{\mu} &= \frac{\sum_{i=1}^{N_{stars}} \frac{\mu_i}{\sigma_i^2}}{\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}} \\ \\
+\mathbf{\sigma}^2 &= \frac1 {\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}}
+\end{align*}
+$$
+
+### $CHEMPY$ TNG yield set
 <p align="center">
-  <img src="plots/sbi_Nstar_comp.png" />
+  <img src="plots/CHEMPY TNG yields N_star comp.png" />
 </p>
 
-### Alternative yield set
+### $CHEMPY$ Alternative yield set
 <p align="center">
-  <img src="plots/sbi_Nstar_analysis_alt.png" />
+  <img src="plots/CHEMPY alternative yields N_star.png" />
 </p>
 
 ### TNG simulation data
 <p align="center">
-  <img src="plots/sbi_Nstar_analysis_tng.png" />
+  <img src="plots/TNG simulation N_star.png" />
 </p>
 
 | | $CHEMPY$ TNG yield set | $CHEMPY$ Alternative yield set | TNG simulation data |
 ---|---|---|---
-||![](plots/sbi_1000stars_noise.png)  |  ![](plots/sbi_1000stars_noise_alt.png) | ![](plots/sbi_1000stars_noise_tng.png)
+||![](plots/CHEMPY%20TNG%20yields.png)  |  ![](plots/CHEMPY%20alternative%20yields.png) | ![](plots/TNG%20simulation.png)
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
-| $\alpha_{IMF}$ | $-2.297 \pm 0.009$ | $-2.274 \pm 0.009$ | $-2.311 \pm 0.009$ |
-|$\log_{10}N_{Ia}$| $-2.893 \pm 0.01$ | $-2.933 \pm 0.01$ | $-2.943 \pm 0.011$ |
-| $\Delta\alpha_{IMF}$ | $0.1\\% $ | $0.9\\%$ | $0.5\\%$ |
-| $\Delta\log_{10}N_{Ia}$ | $0.1\\%$ | $1.5\\%$ | $1.8\\%$ |
+| $\alpha_{IMF}$ | $-2.294 \pm 0.009$ | $-2.273 \pm 0.009$ | $-2.311 \pm 0.009$ |
+|$\log_{10}N_{Ia}$| $-2.894 \pm 0.010$ | $-2.929 \pm 0.010$ | $-2.939 \pm 0.010$ |
+| $\Delta\alpha_{IMF}$ | $0.3\\% $ | $1.1\\%$ | $0.5\\%$ |
+| $\Delta\log_{10}N_{Ia}$ | $0.1\\%$ | $1.3\\%$ | $1.7\\%$ |
 
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set
@@ -80,4 +101,4 @@ that the posterior was trained on.
 The prediction for the TNG simulator seems also to be quite close to the ground truth. <br>
 The deviation is higher for the alternative yield set, since the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
 The total inference time for $1000$ simulations for the $1000$ stars is around $10$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
-The total time from data creation with the simulator to the final inference is less than an hour. <br>
+The total time from training the NN emulator to the final inference is less than half an hour. <br>
