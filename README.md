@@ -53,7 +53,8 @@ We can compute the posterior for a single star from the samples from the NPE. <b
 Because of the central limit theorem, we can write the posterior for a single star as a multivariate Gaussian. <br>
 This gives us the mean and covariance of $\alpha_{IMF}$ and $log{N_{Ia}}$ for one observation. <br>
 
-We can then combine the posterior for multiple stars to get the posterior for the entire dataset. <br>
+We can then combine the posterior for multiple stars to get the posterior for the entire dataset. 
+
 $$ 
 \begin{align*}
 P(\theta| data) &\propto \prod_{i=1}^{N_{stars}} P(\theta| obs_i) \\ \\
@@ -61,7 +62,8 @@ P(\theta| data) &\propto \prod_{i=1}^{N_{stars}} P(\theta| obs_i) \\ \\
 \end{align*} 
 $$
 
-This is a product of Gaussians, so the posterior for the entire dataset is also a Gaussian with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$. <br>
+This is a product of Gaussians, so the posterior for the entire dataset is also a Gaussian with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$. 
+
 $$
 \begin{align*}
 \mathbf{\mu} &= \frac{\sum_{i=1}^{N_{stars}} \frac{\mu_i}{\sigma_i^2}}{\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}} \\ \\
