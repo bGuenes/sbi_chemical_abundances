@@ -6,12 +6,15 @@ from scipy.stats import multivariate_normal
 
 ##########################################################################################################
 # --- Calculate mean and error ---
-def mean_error(x, N_stars):
-    mean = np.mean(x)
-    std = np.std(x)
-    err = std/np.sqrt(N_stars)
+def mean_std(x):
+    # Calculate mean and std for each observation
+    mu_sample, sigma_sample = x.mean(axis=1), x.std(axis=1)
 
-    return mean, err, std
+    # Calculate mean and std for joint distribution
+    mu = np.sum(mu_sample/sigma_sample**2)/np.sum(1/sigma_sample**2)
+    sigma = 1/np.sqrt(np.sum(1/sigma_sample**2))
+
+    return mu, sigma
 
 ##########################################################################################################
 # --- Plot 1D Histogram ---
@@ -213,13 +216,11 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        samples = int(n*simulations)
-        N_stars = int(samples/simulations)
-        mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
-        mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
+        mu_alpha, sigma_alpha = mean_std(x1[:n])
+        mu_logNIa, sigma_logNIa = mean_std(x2[:n])
 
-        fit.append([mean_1, mean_2])
-        err.append([err_1, err_2])
+        fit.append([mu_alpha, mu_logNIa])
+        err.append([sigma_alpha, sigma_logNIa])
         
 
     fit = np.array(fit)
@@ -244,7 +245,7 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
         ax.tick_params(which='minor', size=5, width=2)
 
     for i, name in enumerate([r'$\alpha_{\rm IMF}$', r'$\log_{10} N_{\rm Ia}$']):
-        plot(fit[:,i], err[:,i], x_true[i], ax[i], name)
+        plot(fit[:,i], err[:,i], x_true[0,i], ax[i], name)
 
     ax[0].legend(fontsize=15, fancybox=True, shadow=True)
     
@@ -278,13 +279,11 @@ def n_stars_plot_comp(x1, x2, x_true, dat, no_stars= np.array([1, 10, 100, 500, 
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        samples = int(n*simulations)
-        N_stars = int(samples/simulations)
-        mean_1, err_1, _ = mean_error(x1[0:samples], N_stars)
-        mean_2, err_2, _ = mean_error(x2[0:samples], N_stars)
+        mu_alpha, sigma_alpha = mean_std(x1[:n])
+        mu_logNIa, sigma_logNIa = mean_std(x2[:n])
 
-        fit.append([mean_1, mean_2])
-        err.append([err_1, err_2])
+        fit.append([mu_alpha, mu_logNIa])
+        err.append([sigma_alpha, sigma_logNIa])
         
 
     fit = np.array(fit)
@@ -313,7 +312,7 @@ def n_stars_plot_comp(x1, x2, x_true, dat, no_stars= np.array([1, 10, 100, 500, 
         ax.fill_between(n_stars,lo2[:,i],up2[:,i],alpha=0.1,color='r')
 
     for i, name in enumerate([r'$\alpha_{\rm IMF}$', r'$\log_{10} N_{\rm Ia}$']):
-        plot(fit[:,i], err[:,i], x_true[i], ax[i], name)
+        plot(fit[:,i], err[:,i], x_true[0,i], ax[i], name)
 
     ax[0].legend(fontsize=20, fancybox=True, shadow=True)
     
@@ -365,7 +364,10 @@ def ape_plot(ape, labels_in, save_path):
 ##########################################################################################################
 # --- Gaussian Posterior plot ---
 
-def gaussian_posterior_plot(mu_alpha, sigma_alpha, mu_log10N_Ia, sigma_log10N_Ia, global_params, title):
+def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title):
+
+    mu_alpha, sigma_alpha = mean_std(alpha_IMF)
+    mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia)
 
     # create a grid of points
     grid_x = [-2.35,-2.25]
