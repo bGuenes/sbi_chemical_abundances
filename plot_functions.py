@@ -210,7 +210,7 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
 
 ##########################################################################################################
 # --- N-Star parameter plot ---
-def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
+def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
     fit = []
     err = []
 
@@ -250,12 +250,13 @@ def n_stars_plot(x1, x2, x_true, no_stars= np.array([1, 10, 100, 500, 1000]), si
     ax[0].legend(fontsize=15, fancybox=True, shadow=True)
     
     plt.tight_layout()
+    plt.savefig(f'./plots/{save_name}.png')
     plt.show()
 
 ##########################################################################################################
 # --- N-Star comparison plot ---
 
-def n_stars_plot_comp(x1, x2, x_true, dat, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
+def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
     fit = []
     err = []
 
@@ -317,6 +318,7 @@ def n_stars_plot_comp(x1, x2, x_true, dat, no_stars= np.array([1, 10, 100, 500, 
     ax[0].legend(fontsize=20, fancybox=True, shadow=True)
     
     plt.tight_layout()
+    plt.savefig(f'./plots/{save_name}.png')
     plt.show()
 
 ##########################################################################################################
@@ -371,7 +373,7 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title):
 
     # create a grid of points
     grid_x = [-2.35,-2.25]
-    grid_y = [-2.95,-2.80]
+    grid_y = [-3.0,-2.84]
     x, y = np.mgrid[grid_x[0]:grid_x[1]:0.001, grid_y[0]:grid_y[1]:0.001]
     pos = np.dstack((x, y))
 
@@ -388,8 +390,8 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title):
     label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${global_params[0,0]:.2f}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${global_params[0,1]:.2f}$'
     label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${mu_alpha:.3f} \\pm {sigma_alpha:.3f}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${mu_log10N_Ia:.3f} \\pm {sigma_log10N_Ia:.3f}$'
     
-    legend_true = plt.scatter(global_params[0,0], global_params[0,1], color='red', label=label_gt)
-    legend_fit = plt.scatter(mu_alpha, mu_log10N_Ia, color='k', label=label_fit)
+    legend_true = plt.scatter(global_params[0,0], global_params[0,1], color='red', label=label_gt, s=100)
+    legend_fit = plt.scatter(mu_alpha, mu_log10N_Ia, color='k', label=label_fit, s=100)
     
     legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
     legend_true = plt.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.99))
@@ -417,4 +419,5 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title):
     plt.title(title, fontsize=60)
 
     plt.tight_layout()
+    plt.savefig(f'./plots/{title}.png')
     plt.show()
