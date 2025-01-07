@@ -50,10 +50,10 @@ The third set is data created with the TNG simulator. <br>
 
 ## 4. Multistar Posterior
 We can compute the posterior for a single star from the samples from the NPE. <br>
-Because of the central limit theorem, we can write the posterior for a single star as a multivariate Gaussian. <br>
+Because of the central limit theorem, the posterior for a single star is a multivariate Gaussian. We can fit this with the sampled parameters from the NPE. <br>
 This gives us the mean and covariance of $\alpha_{IMF}$ and $log{N_{Ia}}$ for one observation. <br>
 
-We can then combine the posterior for multiple stars to get the posterior for the entire dataset. 
+We can then calculate the posterior for $\alpha_{IMF}$ and $log{N_{Ia}}$ over multiple stars by multiplying the single star posteriors.
 
 $$ 
 \begin{align*}
@@ -62,7 +62,7 @@ P(\theta| data) &\propto \prod_{i=1}^{N_{stars}} P(\theta| obs_i) \\ \\
 \end{align*} 
 $$
 
-This is a product of Gaussians, so the posterior for the entire dataset is also a Gaussian with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$. 
+The combined posterior is a product of Gaussians, so it is also a Gaussian with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$:
 
 $$
 \begin{align*}
