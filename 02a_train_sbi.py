@@ -32,7 +32,7 @@ name = "NPE_C"
 a = ModelParameters()
 labels_out = a.elements_to_trace
 labels_in = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
-priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
+priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]*2] for opt in a.to_optimize])
 
 combined_priors = utils.MultipleIndependent(
     [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
@@ -78,7 +78,7 @@ check_sbi_inputs(simulator, prior)
 
 
 # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
-density_estimator_build_fun = posterior_nn(model="maf", hidden_features=10, num_transforms=1, blocks=1)
+density_estimator_build_fun = posterior_nn(model="maf", hidden_features=50, num_transforms=5)
 inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True)
 
 start = t.time()
@@ -86,7 +86,7 @@ start = t.time()
 # --- simulate the data ---
 print()
 print("Simulating data...")
-theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=100_000)
+theta, x = simulate_for_sbi(simulator, proposal=prior, num_simulations=500_000)
 print(f"Genereted {len(theta)} samples")
 
 # --- add noise ---
