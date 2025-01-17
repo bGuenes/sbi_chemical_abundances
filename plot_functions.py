@@ -6,15 +6,19 @@ from scipy.stats import multivariate_normal
 
 ##########################################################################################################
 # --- Calculate mean and error ---
-def mean_std(x):
+def mean_std(x, mu_prior, sigma_prior):
     # Calculate mean and std for each observation
     mu_sample, sigma_sample = x.mean(axis=1), x.std(axis=1)
 
     # Calculate mean and std for joint distribution
-    mu = np.sum(mu_sample/sigma_sample**2)/np.sum(1/sigma_sample**2)
+    mu = (np.sum(mu_sample/sigma_sample**2))/(np.sum(1/sigma_sample**2))
     sigma = 1/np.sqrt(np.sum(1/sigma_sample**2))
 
-    return mu, sigma
+    # Calculate the product of the prior and posterior
+    mu_post = (mu/sigma**2 - (1-len(x))*mu_prior/sigma_prior**2)/(1/sigma**2 - (1-len(x))/sigma_prior**2)
+    sigma_post = 1/np.sqrt(1/sigma**2 - (1-len(x))/sigma_prior**2)
+
+    return mu_post, sigma_post
 
 ##########################################################################################################
 # --- Plot 1D Histogram ---
@@ -50,7 +54,7 @@ def plot_1d_hist(x1, x2, x_true, names, simulations):
         else:
             x = x2
 
-        plot_subplot(i, x, x_true[i], names[i])
+        plot_subplot(i, x, x_true[0,i], names[i])
     
     fig.suptitle(f'{int(len(x1)/simulations)} Stars', fontsize=30)
     plt.tight_layout()
@@ -94,7 +98,7 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
     x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
 
     # labels
-    label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[1].item(), 2)}$'
+    label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0,0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[0,1].item(), 2)}$'
     
     label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(mean_1.item(), 3)} \\pm {round(err_1.item(),3)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(mean_2.item(), 3)} \\pm {round(err_2.item(),3)}$'
     
@@ -114,7 +118,7 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
         s = sigma[i]
         t.set(text=f'{s} $\\sigma$')
 
-    legend_true = plt.scatter(x_true[0], x_true[1], color='r', s=10, label=label_gt)
+    legend_true = plt.scatter(x_true[0,0], x_true[0,1], color='r', s=10, label=label_gt)
     legend_fit = plt.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
     legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
@@ -131,7 +135,7 @@ def plot_2d_hist(x1, x2, x_true, N_stars):
 ##########################################################################################################
 # --- Plot 2D Histogram with side plots ---
 def plot_2d_hist_sides(x1, x2, x_true, N_stars):
-    x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true, N_stars)
+    x_lim, y_lim, X, Y, pos, rv, levels, sigma, mean_1, err_1, std_1, mean_2, err_2, std_2 = hist_2d_prep(x1, x2, x_true[0], N_stars)
 
     x = np.linspace(x_lim[0], x_lim[1], 1000)
     y = np.linspace(y_lim[0], y_lim[1], 1000)
@@ -178,12 +182,12 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
         t.set(text=f'{s} $\\sigma$')
 
     # labels
-    label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[1].item(), 2)}$'
+    label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(x_true[0,0].item(), 2)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(x_true[0,1].item(), 2)}$'
     
     label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${round(mean_1.item(), 3)} \\pm {round(err_1.item(),3)}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${round(mean_2.item(), 3)} \\pm {round(err_2.item(),3)}$'
     
     # plot the ground truth and the fit
-    legend_true = axTemperature.scatter(x_true[0], x_true[1], color='r', label=label_gt, s=10)
+    legend_true = axTemperature.scatter(x_true[0,0], x_true[0,1], color='r', label=label_gt, s=10)
     legend_fit = axTemperature.errorbar(mean_1, mean_2, yerr=err_2, xerr=err_1, color='k', marker='.', label=label_fit)
 
     axTemperature.set_xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
@@ -197,8 +201,8 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
     axHistx.plot(x, norm.pdf(x, mean_1, std_1), 'k', linewidth=2)
     axHisty.plot(norm.pdf(y, mean_2, std_2), y, 'k', linewidth=2)
 
-    axHistx.axvline(x=x_true[0], color='r', linestyle='dashed', linewidth=2)
-    axHisty.axhline(y=x_true[1], color='r', linestyle='dashed', linewidth=2)
+    axHistx.axvline(x=x_true[0,0], color='r', linestyle='dashed', linewidth=2)
+    axHisty.axhline(y=x_true[0,1], color='r', linestyle='dashed', linewidth=2)
 
     axHistx.set_xlim(x_lim)
     axHisty.set_ylim(y_lim)    
@@ -216,8 +220,8 @@ def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500,
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        mu_alpha, sigma_alpha = mean_std(x1[:n])
-        mu_logNIa, sigma_logNIa = mean_std(x2[:n])
+        mu_alpha, sigma_alpha = mean_std(x1[:n], x_true[0,0], x_true[1,0])
+        mu_logNIa, sigma_logNIa = mean_std(x2[:n], x_true[0,1], x_true[1,1])
 
         fit.append([mu_alpha, mu_logNIa])
         err.append([sigma_alpha, sigma_logNIa])
@@ -280,8 +284,8 @@ def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10,
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        mu_alpha, sigma_alpha = mean_std(x1[:n])
-        mu_logNIa, sigma_logNIa = mean_std(x2[:n])
+        mu_alpha, sigma_alpha = mean_std(x1[:n], x_true[0,0], x_true[1,0])
+        mu_logNIa, sigma_logNIa = mean_std(x2[:n], x_true[0,1], x_true[1,1])
 
         fit.append([mu_alpha, mu_logNIa])
         err.append([sigma_alpha, sigma_logNIa])
@@ -368,8 +372,8 @@ def ape_plot(ape, labels_in, save_path):
 
 def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title):
 
-    mu_alpha, sigma_alpha = mean_std(alpha_IMF)
-    mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia)
+    mu_alpha, sigma_alpha = mean_std(alpha_IMF, global_params[0,0], global_params[1,0])
+    mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia, global_params[0,1], global_params[1,1])
 
     # create a grid of points
     grid_x = [-2.35,-2.25]
