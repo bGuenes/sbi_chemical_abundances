@@ -58,11 +58,10 @@ The factorization for the posterior distribution  $P(\Lambda|\mathbf{x})$ can be
 $$ 
 \begin{align*}
 P(\Lambda| data) &\propto P(\Lambda)P(data|\Lambda) \\
-&= P(\Lambda) \prod_{i=1}^{N_{stars}} P(obs_i|\Lambda) \\ \\
-&\propto P(\Lambda) \prod_{i=1}^{N_{stars}} \frac{P(\Lambda|obs_i)}{P(\Lambda)} \\ \\
-&\propto P(\Lambda)^{1-n} \prod_{i=1}^{N_{stars}} P(\Lambda|obs_i)\\ \\
-
-&\propto \prod_{i=1}^{N_{stars}} \exp\left(-\frac{1}{2} \frac{(\theta-\mu_i)^2}{\sigma_i^2}\right)
+&= P(\Lambda) \prod_ {i=1}^{N_{stars}} P(obs_i|\Lambda) \\ \\
+&\propto P(\Lambda) \prod_ {i=1}^{N_{stars}} \frac{P(\Lambda|obs_i)}{P(\Lambda)} \\ \\
+&\propto P(\Lambda)^{1-n} \prod_ {i=1}^{N_{stars}} P(\Lambda|obs_i)\\ \\
+&\propto \prod_ {i=1}^{N_{stars}} \exp\left(-\frac{1}{2} \frac{(\theta-\mu_i)^2}{\sigma_i^2}\right)
 \end{align*} 
 $$
 
@@ -80,7 +79,7 @@ In our case the prior for the galactic parameters $\Lambda$ is a gaussian as wel
 $$
 \begin{align*}
 \mathbf{\mu} &= \frac{\frac{\mu'}{\sigma'^2}-\frac{(1-N)\mu_ {prior}}{\sigma_ {prior}^2}}{\frac1{\sigma'^2}-\frac{(1-N)}{\sigma_ {prior}^2}} \\ \\
-\mathbf{\sigma}^2 &= \frac1 {\frac1{\sigma^2}-\frac{(1-N)}{\sigma_ {prior}^2}}
+\mathbf{\sigma}^2 &= \frac1 {\frac1{\sigma'^2}-\frac{(1-N)}{\sigma_ {prior}^2}}
 \end{align*}
 $$
 
