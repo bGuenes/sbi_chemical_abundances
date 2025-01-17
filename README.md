@@ -60,8 +60,8 @@ $$
 P(\Lambda| data) &\propto P(\Lambda)P(data|\Lambda) \\
 &= P(\Lambda) \prod_ {i=1}^{N_{stars}} P(obs_i|\Lambda) \\ \\
 &\propto P(\Lambda) \prod_ {i=1}^{N_{stars}} \frac{P(\Lambda|obs_i)}{P(\Lambda)} \\ \\
-&\propto P(\Lambda)^{1-n} \prod_ {i=1}^{N_{stars}} P(\Lambda|obs_i)\\ \\
-&\propto \prod_ {i=1}^{N_{stars}} \exp\left(-\frac{1}{2} \frac{(\theta-\mu_i)^2}{\sigma_i^2}\right)
+&= P(\Lambda)^{1-N_{stars}} \prod_ {i=1}^{N_{stars}} P(\Lambda|obs_i)\\ \\
+&= \exp \left(-\frac{(1-N_ {stars})(\Lambda-\mu_ {prior})^2}{2\sigma_ {prior}^2}\right)\prod_ {i=1}^{N_{stars}} \exp \left(-\frac{1}{2} \frac{(\Lambda-\mu_i)^2}{\sigma_i^2}\right)
 \end{align*} 
 $$
 
