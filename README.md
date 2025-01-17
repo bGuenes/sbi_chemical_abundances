@@ -53,21 +53,34 @@ We can compute the posterior for a single star from the samples from the NPE. <b
 Because of the central limit theorem, the posterior for a single star is a multivariate Gaussian. We can fit this with the sampled parameters from the NPE. <br>
 This gives us the mean and covariance of $\alpha_{IMF}$ and $log{N_{Ia}}$ for one observation. <br>
 
-We can then calculate the posterior for $\alpha_{IMF}$ and $log{N_{Ia}}$ over multiple stars by multiplying the single star posteriors.
+The factorization for the posterior distribution  $P(\Lambda|\mathbf{x})$ can be obtained by applying Bayes rule twice:
 
 $$ 
 \begin{align*}
-P(\theta| data) &\propto \prod_{i=1}^{N_{stars}} P(\theta| obs_i) \\ \\
+P(\Lambda| data) &\propto P(\Lambda)P(data|\Lambda) \\
+&= P(\Lambda) \prod_{i=1}^{N_{stars}} P(obs_i|\Lambda) \\ \\
+&\propto P(\Lambda) \prod_{i=1}^{N_{stars}} \frac{P(\Lambda|obs_i)}{P(\Lambda)} \\ \\
+&\propto P(\Lambda)^{1-n} \prod_{i=1}^{N_{stars}} P(\Lambda|obs_i)\\ \\
+
 &\propto \prod_{i=1}^{N_{stars}} \exp\left(-\frac{1}{2} \frac{(\theta-\mu_i)^2}{\sigma_i^2}\right)
 \end{align*} 
 $$
 
-The combined posterior is a product of Gaussians, so it is also a Gaussian with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$:
+The product of the single star posteriors is a product of Gaussians, so it's also a Gaussian with mean $\mathbf{\mu'}$ and variance $\mathbf{\sigma'}$:
 
 $$
 \begin{align*}
-\mathbf{\mu} &= \frac{\sum_{i=1}^{N_{stars}} \frac{\mu_i}{\sigma_i^2}}{\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}} \\ \\
-\mathbf{\sigma}^2 &= \frac1 {\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}}
+\mathbf{\mu'} &= \frac{\sum_{i=1}^{N_{stars}} \frac{\mu_i}{\sigma_i^2}}{\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}} \\ \\
+\mathbf{\sigma'}^2 &= \frac1 {\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}}
+\end{align*}
+$$
+
+In our case the prior for the galactic parameters $\Lambda$ is a gaussian as well. Therefore the resulting factorized posterior is again a gaussian and can be expressed with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$:
+
+$$
+\begin{align*}
+\mathbf{\mu} &= \frac{\frac{\mu'}{\sigma'^2}-\frac{(1-N)\mu_ {prior}}{\sigma_ {prior}^2}}{\frac1{\sigma'^2}-\frac{(1-N)}{\sigma_ {prior}^2}} \\ \\
+\mathbf{\sigma}^2 &= \frac1 {\frac1{\sigma^2}-\frac{(1-N)}{\sigma_ {prior}^2}}
 \end{align*}
 $$
 
@@ -92,15 +105,12 @@ $$
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
-| $\alpha_{IMF}$ | $-2.294 \pm 0.009$ | $-2.273 \pm 0.009$ | $-2.311 \pm 0.009$ |
-|$\log_{10}N_{Ia}$| $-2.894 \pm 0.010$ | $-2.929 \pm 0.010$ | $-2.939 \pm 0.010$ |
-| $\Delta\alpha_{IMF}$ | $0.3\\% $ | $1.1\\%$ | $0.5\\%$ |
-| $\Delta\log_{10}N_{Ia}$ | $0.1\\%$ | $1.3\\%$ | $1.7\\%$ |
+| $\alpha_{IMF}$ | $-2.297 \pm 0.007$ | $-2.285 \pm 0.006$ | $-2.305 \pm 0.006$ |
+|$\log_{10}N_{Ia}$| $-2.887 \pm 0.007$ | $-2.910 \pm 0.007$ | $-2.916 \pm 0.007$ |
 
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set
 that the posterior was trained on. 
-The prediction for the TNG simulator seems also to be quite close to the ground truth. <br>
-The deviation is higher for the alternative yield set, since the NN was trained on the TNG yield set and the NPE is not able to generalize to other yield sets. <br>
+The model is still able to predict the parameters for the alternative yield set and the TNG simulation data in its $3 \sigma$ range. <br>
 The total inference time for $1000$ simulations for the $1000$ stars is around $10$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
 The total time from training the NN emulator to the final inference is less than half an hour. <br>
