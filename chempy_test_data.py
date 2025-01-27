@@ -15,9 +15,9 @@ import time
 
 # ----- Set-Up -----------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Config ---
-name = "chempy_alternative_yields" # name of the data file
-N_samples = int(1e3) # number of elements in test set
-mode = "inference" # train or inference
+name = "chempy_TNG_val_data2" # name of the data file
+N_samples = int(5e4) # number of elements in test set
+mode = "train" # train or inference
 # in inference mode the data is "sampled" from one galaxy with the same global parameters (alpha_IMF=-2.3, log10_N_0=-2.89)
 
 # --- Define the yield tables ---
