@@ -11,6 +11,8 @@ from torch.distributions.uniform import Uniform
 import time as t
 import os
 
+import schedulefree
+
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
 path_training = os.path.dirname(__file__) + '/data/chempy_data/chempy_train_uniform_prior.npz'
@@ -81,7 +83,8 @@ model = Model_Torch()
 
 # ----- Train the model -------------------------------------------------------------------------------------------------------------------------------------------
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+#optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+optimizer = schedulefree.AdamWScheduleFree(model.parameters(), lr=1e-3)
 loss_fn = torch.nn.MSELoss()
 
 # shuffle the data
@@ -98,6 +101,8 @@ start = t.time()
 for epoch in range(epochs):
     start_epoch = t.time()
     train_loss = []
+
+    optimizer.train()
     for i in range(0, train_x.shape[0], batch_size):
         optimizer.zero_grad()
         
@@ -117,6 +122,7 @@ for epoch in range(epochs):
         optimizer.step()
         
     # Validation loss
+    optimizer.eval()
     y_pred = model(val_x)
     val_loss = loss_fn(y_pred, val_y)
     
