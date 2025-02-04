@@ -16,7 +16,7 @@ import time
 # ----- Set-Up -----------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Config ---
 name = "chempy_train_uniform_prior" # name of the data file
-N_samples = int(5e4) # number of elements in test set
+N_samples = int(1e5) # number of elements in test set
 mode = "train" # train or inference
 # in inference mode the data is "sampled" from one galaxy with the same global parameters (alpha_IMF=-2.3, log10_N_0=-2.89)
 

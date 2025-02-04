@@ -15,7 +15,7 @@ import schedulefree
 
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
-path_training = os.path.dirname(__file__) + '/data/chempy_data/chempy_TNG_train_data.npz'
+path_training = os.path.dirname(__file__) + '/data/chempy_data/chempy_train_uniform_prior.npz'
 training_data = np.load(path_training, mmap_mode='r')
 
 elements = training_data['elements']
@@ -55,13 +55,6 @@ train_x = torch.tensor(train_x, dtype=torch.float32)
 train_y = torch.tensor(train_y, dtype=torch.float32)
 val_x = torch.tensor(val_x, dtype=torch.float32)
 val_y = torch.tensor(val_y, dtype=torch.float32)
-
-
-# ----- Define the prior ------------------------------------------------------------------------------------------------------------------------------------------
-a = ModelParameters()
-labels = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
-priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
-
 
 # ----- Define the model ------------------------------------------------------------------------------------------------------------------------------------------
 
