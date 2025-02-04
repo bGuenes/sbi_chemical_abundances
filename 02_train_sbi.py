@@ -25,7 +25,7 @@ from plot_functions import *
 # ----- Config -------------------------------------------------------------------------------------------------------------------------------------------
 
 file_path = os.path.dirname(__file__)
-name = "NPE_C"
+name = "NPE_C_nsf_uni"
 
 # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Define the prior ---
@@ -35,10 +35,15 @@ labels_in = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
 priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
 
 combined_priors = utils.MultipleIndependent(
-    [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
+    [Normal(p[0]*torch.ones(1), 2*p[1]*torch.ones(1)) for p in priors] +
     [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
-
+"""
+combined_priors = utils.MultipleIndependent(
+    [Uniform(p[0]*torch.ones(1)-3*p[1], p[0]*torch.ones(1)+3*p[1]) for p in priors] +
+    [Uniform(torch.tensor([1.0]), torch.tensor([13.8]))],
+    validate_args=False)
+"""
 
 # --- Set up the model ---
 class Model_Torch(torch.nn.Module):
@@ -78,7 +83,7 @@ check_sbi_inputs(simulator, prior)
 
 
 # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
-density_estimator_build_fun = posterior_nn(model="maf", hidden_features=10, num_transforms=1, blocks=1)
+density_estimator_build_fun = posterior_nn(model="nsf", hidden_features=20, num_transforms=10, blocks=1)
 inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True)
 
 start = t.time()
@@ -99,7 +104,7 @@ x = torch.tensor(x).float()
 # --- train ---
 print()
 print("Training the posterior...")
-density_estimator = inference.append_simulations(theta, x).train(show_train_summary=True)
+density_estimator = inference.append_simulations(theta, x).train(show_train_summary=False)
 
 # --- build the posterior ---
 posterior = inference.build_posterior(density_estimator)

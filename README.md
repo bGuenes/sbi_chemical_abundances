@@ -13,10 +13,10 @@ The data used to train the NN and NPE is created with $CHEMPY$ as simulator and 
 </p>
 
 ## 1. Train NN
-Firstly we train a neural network to learn the mapping from chemical abundances to galactic parameters. For this we use data created with $CHEMPY$ as simulator. <br>
-The NN is trained on $\sim 500,000$ data points and validated on $\sim 50,000$ data points. The batch size is set to $64$ and the learning rate is set to $0.001$ and trained for $20$ epochs. <br>
+Firstly we train a neural network to learn the mapping from chemical abundances to galactic parameters. For this we use data created with $CHEMPY$ as simulator over a uniform prior over the $3\sigma$-range of the original gaussian prior. <br>
+The NN is trained on $\sim 100,000$ data points and validated on $\sim 50,000$ data points. The batch size is set to $64$ and the learning rate is set to $0.001$ and trained for $20$ epochs. We use [schedualfree](https://arxiv.org/abs/2405.15682) as optimizer. <br>
 The NN is a simple feed-forward neural network with $2$ hidden layers and $100$ neurons in the first and $40$ neurons in the second layer. <br>
-That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $1.3^{+1.6}_{-0.7}\\%$ on the validation set is far below the error rate of real world data of $5\\%$. <br>
+That is sufficient for the accuracy of the generated data, since its absolute percantage error (APE) of $2.6^{+4.1}_{-1.6}\\%$ on the validation set is far below the error rate of real world data of $5\\%$. <br>
 It took around $50s$ to train the NN on CPU. <br>
 
 |||
@@ -24,13 +24,14 @@ It took around $50s$ to train the NN on CPU. <br>
 ![](plots/loss_NN_simulator.png)  |  ![](plots/ape_NN.png)
 
 
-## 2. Train SBI
+## 2. Train NPE
 Secondly we use the NN to train a Neural Posterior Estimator (NPE). <br>
-The network is a masked autoregressive flow (MAF) with $10$ hidden features and $1$ transform. <br>
+The network is a Neural Spline Flow (NSF) with $20$ hidden features and $10$ transforms. <br>
 For that a total of $10^5$ datapoints simulated with the NN are used to train the NPE until it converges.
-This takes approximatley $10$ minutes on multiple CPUs. <br>
+The parameters are sampled from the prior with double the standard deviation of the original prior to provide a better coverage of the parameterspace. <br>
+This takes approximatley $50$ minutes on multiple CPUs. <br>
 The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. Each observation is sampled $1000$ times and the mean is compared to the ground truth. <br>
-The NPE is has an absolute percantage error (APE) of $14.4_{-8.1}^{+16.6}\\%$ for a single prediction and around $7\\%$ for the global parameters $\Lambda$, which we are interested in.<br>
+The NPE is has an absolute percantage error (APE) of $10.7_{-7.5}^{+20.3}\\%$ for a single prediction and around $2.5\\%$ for the global parameters $\Lambda$, which we are interested in.<br>
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
 <div style="display: flex; justify-content: space-between;">
@@ -104,8 +105,8 @@ $$
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
-| $\alpha_{IMF}$ | $-2.297 \pm 0.007$ | $-2.285 \pm 0.006$ | $-2.305 \pm 0.006$ |
-|$\log_{10}N_{Ia}$| $-2.887 \pm 0.007$ | $-2.910 \pm 0.007$ | $-2.916 \pm 0.007$ |
+| $\alpha_{IMF}$ | $-2.298 \pm 0.003$ | $-2.408 \pm 0.002$ | $-2.281 \pm 0.003$ |
+|$\log_{10}N_{Ia}$| $-2.905 \pm 0.004$ | $-3.033 \pm 0.004$ | $-2.909 \pm 0.004$ |
 
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set

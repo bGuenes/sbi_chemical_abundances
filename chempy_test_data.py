@@ -15,9 +15,9 @@ import time
 
 # ----- Set-Up -----------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Config ---
-name = "chempy_alternative_yields" # name of the data file
-N_samples = int(1e3) # number of elements in test set
-mode = "inference" # train or inference
+name = "chempy_train_uniform_prior" # name of the data file
+N_samples = int(1e5) # number of elements in test set
+mode = "train" # train or inference
 # in inference mode the data is "sampled" from one galaxy with the same global parameters (alpha_IMF=-2.3, log10_N_0=-2.89)
 
 # --- Define the yield tables ---
@@ -44,8 +44,14 @@ a.yield_table_name_1a = yield_table_name_1a
 labels = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
 # parameter priors
 priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
+"""
 combined_priors = utils.MultipleIndependent(
     [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
+    [Uniform(torch.tensor([1.0]), torch.tensor([13.8]))],
+    validate_args=False)
+"""
+combined_priors = utils.MultipleIndependent(
+    [Uniform(p[0]*torch.ones(1)-3*p[1], p[0]*torch.ones(1)+3*p[1]) for p in priors] +
     [Uniform(torch.tensor([1.0]), torch.tensor([13.8]))],
     validate_args=False)
 
@@ -60,10 +66,16 @@ if mode == "train":
 elif mode == "inference":
     # Sample different stars from same galaxy
     # (Used for sbi inference)
+    """
     local_GP = utils.MultipleIndependent(
         [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors[2:]] +
         [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
         validate_args=False)
+    """
+    local_GP = utils.MultipleIndependent(
+    [Uniform(p[0]*torch.ones(1)-3*p[1], p[0]*torch.ones(1)+3*p[1]) for p in priors[2:]] +
+    [Uniform(torch.tensor([1.0]), torch.tensor([13.8]))],
+    validate_args=False)
 
     stars = local_GP.sample((N_samples,))
     global_params = torch.tensor([[-2.3, -2.89]])
