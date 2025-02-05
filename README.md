@@ -111,6 +111,7 @@ $$
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set
 that the posterior was trained on. 
-The model is still able to predict the parameters for the alternative yield set and the TNG simulation data in its $3 \sigma$ range. <br>
-The total inference time for $1000$ simulations for the $1000$ stars is around $10$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
+The model is still able to predict the parameters for the TNG simulation data to a good degree, but is overconfident. <br>
+The prediction for a different yield set is far off, as expected since the dynamics of the simulator changed. <br>
+The total inference time for $1000$ simulations for the $1000$ stars is around $50$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
 The total time from training the NN emulator to the final inference is less than half an hour. <br>
