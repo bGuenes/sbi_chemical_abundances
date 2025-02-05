@@ -105,8 +105,8 @@ $$
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
-| $\alpha_{IMF}$ | $-2.298 \pm 0.003$ | $-2.408 \pm 0.002$ | $-2.281 \pm 0.003$ |
-|$\log_{10}N_{Ia}$| $-2.905 \pm 0.004$ | $-3.033 \pm 0.004$ | $-2.909 \pm 0.004$ |
+| $\alpha_{IMF}$ | $-2.298 \pm 0.003$ | $-2.409 \pm 0.002$ | $-2.283 \pm 0.003$ |
+|$\log_{10}N_{Ia}$| $-2.905 \pm 0.004$ | $-3.031 \pm 0.004$ | $-2.905 \pm 0.004$ |
 
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set
