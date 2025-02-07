@@ -15,7 +15,7 @@ import schedulefree
 
 # ----- Load the data ---------------------------------------------------------------------------------------------------------------------------------------------
 # --- Load in training data ---
-path_training = os.path.dirname(__file__) + '/data/chempy_data/chempy_train_uniform_prior.npz'
+path_training = os.path.dirname(__file__) + '/data/chempy_data/chempy_train_uniform_prior_5sigma.npz'
 training_data = np.load(path_training, mmap_mode='r')
 
 elements = training_data['elements']
@@ -139,7 +139,7 @@ plt.ylabel('MSE Loss', fontsize=15)
 plt.title('Training and Validation Loss', fontsize=20)
 plt.legend()
 plt.tight_layout()
-plt.savefig("plots/loss_NN_simulator.png")
+plt.savefig("plots/loss_NN_simulator_5sigma_uni_prior.png")
 plt.clf()
 
 # ----- Calculate the Absolute Percantage Error -----
@@ -170,9 +170,9 @@ fig.suptitle('APE of the Neural Network', fontsize=20)
 plt.xlim(0, 30)
 fig.tight_layout()
 
-plt.savefig("plots/ape_NN.png")
+plt.savefig("plots/ape_NN_5sigma_uni_prior.png")
 plt.clf()
 
 # ----- Save the model --------------------------------------------------------------------------------------------------------------------------------------------
-torch.save(model.state_dict(), 'data/pytorch_state_dict.pt')
+torch.save(model.state_dict(), 'data/pytorch_state_dict_5sigma_uni_prior.pt')
 print("Model trained and saved")
