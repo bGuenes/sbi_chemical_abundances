@@ -214,14 +214,14 @@ def plot_2d_hist_sides(x1, x2, x_true, N_stars):
 
 ##########################################################################################################
 # --- N-Star parameter plot ---
-def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
+def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000, prior=np.array([[-2.3, -2.89], [0.3, 0.3]])):
     fit = []
     err = []
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        mu_alpha, sigma_alpha = mean_std(x1[:n], x_true[0,0], x_true[1,0])
-        mu_logNIa, sigma_logNIa = mean_std(x2[:n], x_true[0,1], x_true[1,1])
+        mu_alpha, sigma_alpha = mean_std(x1[:n], prior[0,0], prior[1,0])
+        mu_logNIa, sigma_logNIa = mean_std(x2[:n], prior[0,1], prior[1,1])
 
         fit.append([mu_alpha, mu_logNIa])
         err.append([sigma_alpha, sigma_logNIa])
@@ -233,16 +233,16 @@ def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500,
     # --- Plot the data ---
     fig,ax=plt.subplots(nrows=1,ncols=2,figsize=(26,6))
 
-    def plot(fit, err, x_true, ax, name):
+    def plot(fit, err, true, ax, name):
         ax.plot(no_stars, fit, color="b", label="Fit")
         ax.fill_between(no_stars, fit-err, fit+err, alpha=0.3,color="b", label=r"1 & 2 $\sigma$")
         ax.fill_between(no_stars, fit-2*err, fit+2*err, alpha=0.2,color="b")
 
-        ax.axhline(x_true, color='k', linestyle=':', linewidth=2, label='Ground Truth')
+        ax.axhline(true, color='k', linestyle=':', linewidth=2, label='Ground Truth')
 
         ax.set_xlabel(r'$N_{\rm stars}$', fontsize=40)
         ax.set_ylabel(name, fontsize=40)
-        ax.set_ylim([x_true-0.2*abs(x_true), x_true+0.2*abs(x_true)])
+        ax.set_ylim([true-0.2*abs(true), true+0.2*abs(true)])
         ax.set_xscale('log')
         ax.set_xlim([1,1000])
         ax.tick_params(labelsize=30, size=10, width=3)
@@ -260,7 +260,7 @@ def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500,
 ##########################################################################################################
 # --- N-Star comparison plot ---
 
-def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000):
+def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10, 100, 500, 1000]), simulations=1000, prior=np.array([[-2.3, -2.89], [0.3, 0.3]])):
     fit = []
     err = []
 
@@ -284,8 +284,8 @@ def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10,
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        mu_alpha, sigma_alpha = mean_std(x1[:n], x_true[0,0], x_true[1,0])
-        mu_logNIa, sigma_logNIa = mean_std(x2[:n], x_true[0,1], x_true[1,1])
+        mu_alpha, sigma_alpha = mean_std(x1[:n], prior[0,0], prior[1,0])
+        mu_logNIa, sigma_logNIa = mean_std(x2[:n], prior[0,1], prior[1,1])
 
         fit.append([mu_alpha, mu_logNIa])
         err.append([sigma_alpha, sigma_logNIa])
@@ -297,16 +297,16 @@ def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10,
     # --- Plot the data ---
     fig,ax=plt.subplots(nrows=1,ncols=2,figsize=(26,6))
 
-    def plot(fit, err, x_true, ax, name):
+    def plot(fit, err, true, ax, name):
         ax.plot(no_stars, fit, color="b", label="Fit")
         ax.fill_between(no_stars, fit-err, fit+err, alpha=0.1,color="b", label=r"1 & 2 $\sigma$")
         ax.fill_between(no_stars, fit-2*err, fit+2*err, alpha=0.1,color="b")
 
-        ax.axhline(x_true, color='k', linestyle=':', linewidth=2, label='Ground Truth')
+        ax.axhline(true, color='k', linestyle=':', linewidth=2, label='Ground Truth')
 
         ax.set_xlabel(r'$N_{\rm stars}$', fontsize=40)
         ax.set_ylabel(name, fontsize=40)
-        ax.set_ylim([x_true-0.2*abs(x_true), x_true+0.2*abs(x_true)])
+        ax.set_ylim([true-0.2*abs(true), true+0.2*abs(true)])
         ax.set_xscale('log')
         ax.set_xlim([1,1000])
         ax.tick_params(labelsize=30, size=10, width=3)
@@ -370,10 +370,10 @@ def ape_plot(ape, labels_in, save_path):
 ##########################################################################################################
 # --- Gaussian Posterior plot ---
 
-def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title):
+def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title, prior=np.array([[-2.3, -2.89], [0.3, 0.3]])):
 
-    mu_alpha, sigma_alpha = mean_std(alpha_IMF, global_params[0,0], global_params[1,0])
-    mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia, global_params[0,1], global_params[1,1])
+    mu_alpha, sigma_alpha = mean_std(alpha_IMF, prior[0,0], prior[1,0])
+    mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia, prior[0,1], prior[1,1])
 
     # create a grid of points
     #grid_x = [-2.35,-2.25]
