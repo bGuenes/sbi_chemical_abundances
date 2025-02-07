@@ -108,7 +108,7 @@ $$
 | $\alpha_{IMF}$ | $-2.300 \pm 0.003$ | $-2.401 \pm 0.002$ | $-2.284 \pm 0.003$ |
 |$\log_{10}N_{Ia}$| $-2.901 \pm 0.004$ | $-3.028 \pm 0.005$ | $-2.891 \pm 0.004$ |
 
-As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate, 
+As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate,
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set that the posterior was trained on. 
 The model is still able to predict the parameters for the TNG simulation data to a good degree, but is overconfident. <br>
 The prediction for a different yield set is far off, as expected since the dynamics of the simulator changed. <br>
@@ -121,4 +121,3 @@ We test the NPE by sampling from a different values for the galactic parameters.
 <p align="center">
   <img src="plots/CHEMPY TNG yields N_star test.png" />
 </p>
-
