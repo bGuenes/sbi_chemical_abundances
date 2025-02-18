@@ -48,10 +48,10 @@ def objective(trial):
     
     # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
     density_estimator_build_fun = posterior_nn(model='nsf', hidden_features=hidden_features, num_transforms=num_transforms, )
-    inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True, device=device)
+    inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True)
 
     # --- train ---
-    density_estimator = inference.append_simulations(theta, x).train(show_train_summary=True, training_batch_size=10_000, max_num_epochs=2)
+    density_estimator = inference.append_simulations(theta, x).train(show_train_summary=True, training_batch_size=10_000)
 
     # --- build the posterior ---
     posterior = inference.build_posterior(density_estimator)
@@ -61,7 +61,7 @@ def objective(trial):
 
 
     sampler = PosteriorSamples(num_samples=500, sample_method='direct')
-    xv, tv = x_test.to(device), theta_test.to(device)
+    xv, tv = x_test, theta_test
     samps = sampler(posterior, xv, tv)
 
     # measure tarp
@@ -71,19 +71,13 @@ def objective(trial):
         num_bootstrap=100
     )
 
-    tarp_val = torch.mean(torch.from_numpy(ecp[:,ecp.shape[1]//2])).to(device)
+    tarp_val = torch.mean(torch.from_numpy(ecp[:,ecp.shape[1]//2]))
 
     
     return nll_test, abs(tarp_val-0.5)
 
 
 if __name__ == '__main__':
-    
-    device='cuda:3'
-
-    # ----- Config -------------------------------------------------------------------------------------------------------------------------------------------
-
-    name = "NPE_C"
 
     # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
     # --- Define the prior ---
@@ -93,8 +87,8 @@ if __name__ == '__main__':
     priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
 
     combined_priors = utils.MultipleIndependent(
-        [Normal(p[0]*torch.ones(1, device=device), p[1]*torch.ones(1, device=device)) for p in priors] +
-        [Uniform(torch.tensor([2.0], device=device), torch.tensor([12.8], device=device))],
+        [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
+        [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
         validate_args=False)
     
     # combined_priors = utils.MultipleIndependent(
@@ -105,15 +99,15 @@ if __name__ == '__main__':
     prior, num_parameters, prior_returns_numpy = process_prior(combined_priors)
     
     training_data = np.load('data/optuna/training_uni.npz')
-    x = torch.tensor(training_data['x']).to(device)
-    theta =  torch.tensor(training_data['theta']).to(device)
+    x = torch.tensor(training_data['x'])
+    theta =  torch.tensor(training_data['theta'])
     
     test_data = np.load('data/optuna/test_uni.npz')
-    x_test = torch.tensor(test_data['x_test']).to(device)
-    theta_test = torch.tensor(test_data['theta_test']).to(device)
+    x_test = torch.tensor(test_data['x_test'])
+    theta_test = torch.tensor(test_data['theta_test'])
 
-    study_name = 'example_study_nsf_uni'  # Unique identifier of the study.
-    storage_name = 'sqlite:///example_onlylog_nsf_uni.db'
+    study_name = 'example_study_nsf_uni_cpu'  # Unique identifier of the study.
+    storage_name = 'sqlite:///example_onlylog_nsf_uni_cpu.db'
     study = optuna.create_study(study_name=study_name, storage=storage_name,directions=['maximize', 'minimize'], load_if_exists=True)
     study = optuna.load_study(study_name=study_name, storage=storage_name)
     study.optimize(objective, callbacks=[MaxTrialsCallback(16, states=(TrialState.COMPLETE, TrialState.FAIL))],)
