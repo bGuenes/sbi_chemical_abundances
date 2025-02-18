@@ -41,7 +41,7 @@ combined_priors = utils.MultipleIndependent(
 """
 combined_priors = utils.MultipleIndependent(
     [Uniform(p[0]*torch.ones(1)-5*p[1], p[0]*torch.ones(1)+5*p[1]) for p in priors] +
-    [Uniform(torch.tensor([1.0]), torch.tensor([13.8]))],
+    [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
 
 
