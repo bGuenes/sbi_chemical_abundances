@@ -25,7 +25,7 @@ from plot_functions import *
 # ----- Config -------------------------------------------------------------------------------------------------------------------------------------------
 
 file_path = os.path.dirname(__file__)
-name = "NPE_C_nsf_5sigma_uni_prior"
+name = "NPE_C_nsf_5sigma_uni_prior_20_10"
 
 # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Define the prior ---
@@ -83,7 +83,7 @@ check_sbi_inputs(simulator, prior)
 
 
 # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
-density_estimator_build_fun = posterior_nn(model="nsf", hidden_features=20, num_transforms=10, blocks=1)
+density_estimator_build_fun = posterior_nn(model="nsf", hidden_features=20, num_transforms=10)
 inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True)
 
 start = t.time()
@@ -163,7 +163,7 @@ abundances =  torch.cat([val_x[:,:2], val_x[:,3:]], dim=1)
 x_err = np.ones_like(abundances)*float(pc_ab)/100.
 abundances = norm.rvs(loc=abundances,scale=x_err)
 abundances = torch.tensor(abundances).float()
-
+"""
 theta_hat = torch.zeros_like(val_theta)
 for index in tqdm(range(len(abundances))):
     thetas_predicted = posterior.sample((1000,), x=abundances[index], show_progress_bars=False)
@@ -216,3 +216,21 @@ f.suptitle("SBC rank plot", fontsize=36)
 plt.tight_layout()
 plt.savefig(file_path + f'/plots/sbc_rank_plot_{name}.png')
 plt.clf()
+"""
+
+# --- Plot calbration using ltu-ili ---
+from metrics import PosteriorCoverage
+
+plot_hist = ["coverage", "histogram", "predictions", "tarp"]
+metric = PosteriorCoverage(
+    num_samples=1000, sample_method="direct",
+    labels=labels_in,
+    plot_list = plot_hist
+)
+
+fig = metric(
+    posterior=posterior,
+    x=abundances, theta=val_theta)
+
+for i, plot in enumerate(fig):
+    fig[i].savefig(file_path+ f"/plots/ili_{plot_hist[i]}_20_10.pdf")
