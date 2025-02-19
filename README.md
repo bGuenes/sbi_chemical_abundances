@@ -34,11 +34,9 @@ The accuracy is afterwards tested with the $\sim 50,000$ validation data points 
 The NPE is has an absolute percantage error (APE) of $10.7_{-7.5}^{+20.3}\\%$ for a single prediction and around $2.5\\%$ for the global parameters $\Lambda$, which we are interested in.<br>
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
-<div style="display: flex; justify-content: space-between;">
-  <img src="plots/sbc_rank_plot_NPE_C_nsf_5sigma_uni_prior.png" style="width: 49%;"/>
-  <img src="plots/ape_posterior_NPE_C_nsf_5sigma_uni_prior.png" style="width: 49%;"/>
-</div>
-
+![](plots/ili_coverage_20_10.png)
+![](plots/ili_histogram_20_10.png)
+![](plots/ili_predictions_20_10.png)
 
 ## 3. Inference
 
