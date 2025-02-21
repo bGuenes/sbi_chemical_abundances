@@ -21,11 +21,12 @@ import os
 from tqdm import tqdm
 
 from plot_functions import *
+from metrics import PosteriorCoverage
 
 # ----- Config -------------------------------------------------------------------------------------------------------------------------------------------
 
 file_path = os.path.dirname(__file__)
-name = "NPE_C_nsf_5sigma_uni_prior_20_10"
+name = "NPE_C_nsf_20_10"
 
 # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Define the prior ---
@@ -33,9 +34,9 @@ a = ModelParameters()
 labels_out = a.elements_to_trace
 labels_in = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
 priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
-"""
+
 combined_priors = utils.MultipleIndependent(
-    [Normal(p[0]*torch.ones(1), 2*p[1]*torch.ones(1)) for p in priors] +
+    [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
     [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
 """
@@ -43,7 +44,7 @@ combined_priors = utils.MultipleIndependent(
     [Uniform(p[0]*torch.ones(1)-5*p[1], p[0]*torch.ones(1)+5*p[1]) for p in priors] +
     [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
-
+"""
 
 # --- Set up the model ---
 class Model_Torch(torch.nn.Module):
@@ -219,7 +220,6 @@ plt.clf()
 """
 
 # --- Plot calbration using ltu-ili ---
-from metrics import PosteriorCoverage
 
 plot_hist = ["coverage", "histogram", "predictions", "tarp"]
 metric = PosteriorCoverage(
@@ -233,4 +233,4 @@ fig = metric(
     x=abundances, theta=val_theta)
 
 for i, plot in enumerate(fig):
-    fig[i].savefig(file_path+ f"/plots/ili_{plot_hist[i]}_20_10.pdf")
+    fig[i].savefig(file_path+ f"/plots/ili_{plot_hist[i]}_{name}.pdf")
