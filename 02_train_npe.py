@@ -20,12 +20,13 @@ import pickle
 import os
 from tqdm import tqdm
 
+from optuna.metrics import PosteriorCoverage
 from plot_functions import *
 
 # ----- Config -------------------------------------------------------------------------------------------------------------------------------------------
 
 file_path = os.path.dirname(__file__)
-name = "NPE_C_nsf_5sigma_uni_prior_20_10"
+name = "NPE_C_maf_8_4"
 
 # ----- Load the model -------------------------------------------------------------------------------------------------------------------------------------------
 # --- Define the prior ---
@@ -33,9 +34,9 @@ a = ModelParameters()
 labels_out = a.elements_to_trace
 labels_in = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
 priors = torch.tensor([[a.priors[opt][0], a.priors[opt][1]] for opt in a.to_optimize])
-"""
+
 combined_priors = utils.MultipleIndependent(
-    [Normal(p[0]*torch.ones(1), 2*p[1]*torch.ones(1)) for p in priors] +
+    [Normal(p[0]*torch.ones(1), p[1]*torch.ones(1)) for p in priors] +
     [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
 """
@@ -43,7 +44,7 @@ combined_priors = utils.MultipleIndependent(
     [Uniform(p[0]*torch.ones(1)-5*p[1], p[0]*torch.ones(1)+5*p[1]) for p in priors] +
     [Uniform(torch.tensor([2.0]), torch.tensor([12.8]))],
     validate_args=False)
-
+"""
 
 # --- Set up the model ---
 class Model_Torch(torch.nn.Module):
@@ -83,7 +84,7 @@ check_sbi_inputs(simulator, prior)
 
 
 # ----- Train the SBI -------------------------------------------------------------------------------------------------------------------------------------------
-density_estimator_build_fun = posterior_nn(model="nsf", hidden_features=20, num_transforms=10)
+density_estimator_build_fun = posterior_nn(model="maf", hidden_features=8, num_transforms=4)
 inference = NPE_C(prior=prior, density_estimator=density_estimator_build_fun, show_progress_bars=True)
 
 start = t.time()
@@ -133,8 +134,8 @@ print("Evaluating the posterior...")
 path_test = file_path + '/data/chempy_data/chempy_TNG_val_data.npz'
 val_data = np.load(path_test, mmap_mode='r')
 
-val_theta = val_data['params']
-val_x = val_data['abundances']
+val_theta = val_data['params'][:5000]
+val_x = val_data['abundances'][:5000]
 
 
 # --- Clean the data ---
@@ -219,8 +220,6 @@ plt.clf()
 """
 
 # --- Plot calbration using ltu-ili ---
-from metrics import PosteriorCoverage
-
 plot_hist = ["coverage", "histogram", "predictions", "tarp"]
 metric = PosteriorCoverage(
     num_samples=1000, sample_method="direct",
@@ -233,4 +232,4 @@ fig = metric(
     x=abundances, theta=val_theta)
 
 for i, plot in enumerate(fig):
-    fig[i].savefig(file_path+ f"/plots/ili_{plot_hist[i]}_20_10.pdf")
+    fig[i].savefig(file_path+ f"/plots/ili_{plot_hist[i]}_{name}.png")

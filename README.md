@@ -26,22 +26,22 @@ It took around $200s$ to train the NN on CPU. <br>
 
 ## 2. Train NPE
 Secondly we use the NN to train a Neural Posterior Estimator (NPE). <br>
-The network is a Neural Spline Flow (NSF) with $20$ hidden features and $10$ transforms. <br>
+The network is a Masked Autoregressive Flow (MAF) with $8$ hidden features and $4$ transforms. <br>
 For that a total of $10^5$ datapoints simulated with the NN are used to train the NPE until it converges.
 The parameters are sampled from a uniform prior over the $5\sigma$-range of the original gaussian prior to provide a better coverage of the parameterspace. <br>
-This takes approximatley $70$ minutes on multiple CPUs. <br>
+This takes approximatley $20$ minutes on multiple CPUs. <br>
 The accuracy is afterwards tested with the $\sim 50,000$ validation data points from the original simulator $CHEMPY$. Each observation is sampled $1000$ times and the mean is compared to the ground truth. <br>
 The NPE is has an absolute percantage error (APE) of $10.7_{-7.5}^{+20.3}\\%$ for a single prediction and around $2.5\\%$ for the global parameters $\Lambda$, which we are interested in.<br>
 The accuracy for a single prediction of the parameters is not really high. That's why we use multiple stars from the same galaxy to infer the global galactic parameters $\alpha_{IMF}$ & $log_{10}N_{Ia}$, since they are the same for all stars in the same galaxy. <br>
 
-![](plots/ili_coverage_20_10.png)
-![](plots/ili_histogram_20_10.png)
-![](plots/ili_predictions_20_10.png)
+![](plots/ili_coverage_NPE_C_maf_8_4.png)
+![](plots/ili_histogram_NPE_C_maf_8_4.png)
+![](plots/ili_predictions_NPE_C_maf_8_4.png)
 
 ## 3. Inference
 
 Finally we sample from the posterior distribution to infer the global galactic parameters. <br>
-For that we use the chemical abundances of $1000$ stars from the same galaxy (meaning they have the same galactic parameters $\Lambda$) and the local parameters $\Theta_i$ are sampled from the priors.
+For that we use the chemical abundances of $200$ stars from the same galaxy (meaning they have the same galactic parameters $\Lambda$) and the local parameters $\Theta_i$ are sampled from the priors.
 The galactic parameters were fixed to  $\alpha_{IMF} = -2.3$ and $log_{10}N_{Ia} = -2.89$. <br>
 The first set is created with the NN trained on data created with the TNG yield set. <br>
 The second set is created from $CHEMPY$ directly with an alternative yield set. <br>
@@ -103,14 +103,12 @@ $$
 | SN Ia | TNG_net | Thielemann et al. (2003) |
 | SN II | TNG_net | Nomoto et al. (2013) |
 | AGB | TNG | Karakas & Lugaro (2016) |
-| $\alpha_{IMF}$ | $-2.300 \pm 0.003$ | $-2.401 \pm 0.002$ | $-2.284 \pm 0.003$ |
-|$\log_{10}N_{Ia}$| $-2.901 \pm 0.004$ | $-3.028 \pm 0.005$ | $-2.891 \pm 0.004$ |
 
 As expected, the inferred parameters deviate from the ground truth for a sigle prediction, since the NPE has a high error rate,
 but is able to infer the global parameters with a high accuracy for a growing number of stars in the case where we used data created with the correct yield set that the posterior was trained on. 
 The model is still able to predict the parameters for the TNG simulation data to a good degree, but is overconfident. <br>
 The prediction for a different yield set is far off, as expected since the dynamics of the simulator changed. <br>
-The total inference time for $1000$ simulations for the $1000$ stars is around $50$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
+The total inference time for $1000$ simulations for the $200$ stars is around $20$ seconds for each yield set and therefore orders of magnitudes faster then traditional MCMC methods, which would take around $40$ hours for $200$ stars. <br>
 
 
 ## 6. Test different galactic parameters

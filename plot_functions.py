@@ -244,7 +244,7 @@ def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500,
         ax.set_ylabel(name, fontsize=40)
         ax.set_ylim([true-0.2*abs(true), true+0.2*abs(true)])
         ax.set_xscale('log')
-        ax.set_xlim([1,1000])
+        ax.set_xlim([1,no_stars[-1]])
         ax.tick_params(labelsize=30, size=10, width=3)
         ax.tick_params(which='minor', size=5, width=2)
 
@@ -308,7 +308,7 @@ def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10,
         ax.set_ylabel(name, fontsize=40)
         ax.set_ylim([true-0.2*abs(true), true+0.2*abs(true)])
         ax.set_xscale('log')
-        ax.set_xlim([1,1000])
+        ax.set_xlim([1,no_stars[-1]])
         ax.tick_params(labelsize=30, size=10, width=3)
         ax.tick_params(which='minor', size=5, width=2)
         # Add Philcox
