@@ -27,9 +27,9 @@ all_n = [1, 5, 10, 100, 200]
 max_stars = max(all_n)
 max_iteration = 200
 elem_err = False
-n_init = 20_000
+n_init = 2_000
 n_samples = 1_000
-chains = 16_000
+chains = 1_000
 cores = int(mp.cpu_count() * 0.9)
 tune = 2_000
 

@@ -21,24 +21,24 @@ mode = "train" # train or inference
 # in inference mode the data is "sampled" from one galaxy with the same global parameters (alpha_IMF=-2.3, log10_N_0=-2.89)
 
 # --- Define the yield tables ---
-yield_table_name_sn2_list = ['chieffi04','Nugrid','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net']#'Frischknecht16_net'
-yield_table_name_sn2_index = 8#2
-yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
+yield_table_name_sn2_list = ['chieffi04','Nomoto2013','Portinari_net', 'chieffi04_net', 'Nomoto2013_net','NuGrid_net','West17_net','TNG_net','CL18_net', 'Frischknecht16_net']
+# yield_table_name_sn2_index = 8#2
+# yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
-yield_table_name_agb_list = ['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
-yield_table_name_agb_index = 5#4
-yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
+yield_table_name_agb_list = ['Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] #['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
+# yield_table_name_agb_index = 5#4
+# yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
-yield_table_name_1a_list = ['Iwamoto','Thielemann','Seitenzahl', 'TNG']
-yield_table_name_1a_index = 3#1
-yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
+yield_table_name_1a_list = ['Seitenzahl'] #['Iwamoto','Thielemann','Seitenzahl', 'TNG']
+# yield_table_name_1a_index = 3#1
+# yield_table_name_1a = yield_table_name_1a_list[yield_table_name_1a_index]
 
 
 # --- Define the prior ---
 a = ModelParameters()
-a.yield_table_name_sn2 = yield_table_name_sn2
-a.yield_table_name_agb = yield_table_name_agb
-a.yield_table_name_1a = yield_table_name_1a
+# a.yield_table_name_sn2 = yield_table_name_sn2
+# a.yield_table_name_agb = yield_table_name_agb
+# a.yield_table_name_1a = yield_table_name_1a
 
 # parameter labels
 labels = [a.to_optimize[i] for i in range(len(a.to_optimize))] + ['time']
@@ -90,9 +90,9 @@ def runner(index):
     #print(index)
     theta = thetas[index]
     a = ModelParameters()
-    a.yield_table_name_sn2 = yield_table_name_sn2
-    a.yield_table_name_agb = yield_table_name_agb
-    a.yield_table_name_1a = yield_table_name_1a
+    a.yield_table_name_sn2 = sn2
+    a.yield_table_name_agb = agb
+    a.yield_table_name_1a = sn1a
 
     try:
         output=single_timestep_chempy((theta,a))
@@ -113,11 +113,19 @@ if __name__ == '__main__':
 
     start = time.time()
     print("Running Chempy")
-    with mp.Pool(mp.cpu_count()) as pool:
-        output = list(tqdm(pool.imap(runner, np.arange(N_samples)), total=N_samples))
-    abuns=[o[0] for o in output]
-    thetas=[o[1] for o in output]
-    end = time.time()
 
+    for agb in yield_table_name_agb_list:
+        for sn2 in yield_table_name_sn2_list:
+            for sn1a in yield_table_name_1a_list:
+                print(f"AGB: {agb}, SN2: {sn2}, SN1a: {sn1a}")
+
+                with mp.Pool(mp.cpu_count()) as pool:
+                    output = list(tqdm(pool.imap(runner, np.arange(N_samples)), total=N_samples))
+                abuns=[o[0] for o in output]
+                thetas=[o[1] for o in output]
+
+                np.savez(f'data/model_comp_data(AGB,SN2,SN1a)/{agb}_{sn2}_{sn1a}_train.npz', params=thetas, abundances=abuns, elements=elements)
+    
+    end = time.time()
     print(f"Time taken: {end - start:.1f} s")
-    np.savez(f'data/chempy_data/{name}.npz', params=thetas, abundances=abuns, elements=elements)
+    
