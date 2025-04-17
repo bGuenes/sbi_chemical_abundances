@@ -1,4 +1,8 @@
 # Inferring Galactic Parameters from Chemical Abundances with Simulation-Based Inference
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14925307.svg)](https://doi.org/10.5281/zenodo.14925307)
+[![arXiv](https://img.shields.io/badge/arXiv-2503.02456-b31b1b.svg)](https://arxiv.org/abs/2503.02456)
+
 $CHEMPY$ is a chemical evolution code that simulates the chemical evolution of galaxies. <br>
 We use $CHEMPY$ to simulate chemical abundances of stars in a galaxy. <br>
 We then train a neural network (NN) to learn the mapping from galactic parameters to chemical abundances to replace $CHEMPY$ as simulator and create more training points for the Neural Posterior Estimator (NPE). <br>
