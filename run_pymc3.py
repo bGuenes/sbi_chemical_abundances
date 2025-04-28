@@ -30,7 +30,7 @@ elem_err = False
 n_init = 2_000
 n_samples = 1_000
 chains = 1_000
-cores = int(mp.cpu_count() * 0.9)
+cores = int(mp.cpu_count() * 0.8)
 tune = 2_000
 
 outfile = file_path + '/data/mcmc_inference.npz'
@@ -199,9 +199,6 @@ def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=100
     # Create stacked mean and variances
     loc_mean=np.hstack([np.asarray(std_Theta_prior_mean).reshape(1,-1)*np.ones([n_stars,1]),std_times_mean[:n_stars].reshape(-1,1)])
     loc_std=np.hstack([np.asarray(std_Theta_prior_width).reshape(1,-1)*np.ones([n_stars,1]),std_times_width[:n_stars].reshape(-1,1)])
-    
-    # Define PyMC3 Model
-    simple_model=pm.Model()
 
     def pytorch_forward(input_vars):
         # Convert PyTensor to NumPy to PyTorch
@@ -259,12 +256,12 @@ def n_star_inference(n_stars,iteration,elem_err=False,n_init=20000,n_samples=100
         likelihood=pm.Normal('likelihood', mu=output.ravel(), sigma=tot_error.ravel(), 
                              observed=obs_abundances.ravel())
         
-    # Now sample
-    init_time = ttime.time()
-    with simple_model:
+        # Now sample
+        init_time = ttime.time()
+
         samples=pm.sample(draws=n_samples,chains=chains,cores=cores,tune=tune,
-                  step=pm.NUTS(target_accept=0.9),init='advi+adapt_diag',random_seed=42)
-    end_time = ttime.time()-init_time
+                step=pm.NUTS(target_accept=0.9),init='advi+adapt_diag',random_seed=42)
+        end_time = ttime.time()-init_time
 
     def construct_output(samples):
         Lambda = samples.posterior['Lambda'].values.reshape(-1, 2)  # Reshape for Lambda dimensions

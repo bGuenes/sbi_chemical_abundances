@@ -16,7 +16,7 @@ import time
 # ----- Set-Up -----------------------------------------------------------------------------------------------------------------------------------------------------
 # --- Config ---
 name = "chempy_train_uniform_prior_5sigma" # name of the data file
-N_samples = int(1e6) # number of elements in test set
+N_samples = int(1e5) # number of elements in test set
 mode = "train" # train or inference
 # in inference mode the data is "sampled" from one galaxy with the same global parameters (alpha_IMF=-2.3, log10_N_0=-2.89)
 
@@ -25,7 +25,7 @@ yield_table_name_sn2_list = ['chieffi04','Nomoto2013','Portinari_net', 'chieffi0
 # yield_table_name_sn2_index = 8#2
 # yield_table_name_sn2 = yield_table_name_sn2_list[yield_table_name_sn2_index]
 
-yield_table_name_agb_list = ['Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] #['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
+yield_table_name_agb_list = ['Nugrid','Karakas_net_yield','Ventura_net','TNG_net'] #['Karakas','Nugrid','Karakas_net_yield','Ventura_net','Karakas16_net','TNG_net'] # Karakas2016 needs much more calculational resources (order of magnitude) using 2010 net yields from Karakas are faster and only N is significantly underproduced
 # yield_table_name_agb_index = 5#4
 # yield_table_name_agb = yield_table_name_agb_list[yield_table_name_agb_index]
 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                 abuns=[o[0] for o in output]
                 thetas=[o[1] for o in output]
 
-                np.savez(f'data/model_comp_data(AGB,SN2,SN1a)/{agb}_{sn2}_{sn1a}_train.npz', params=thetas, abundances=abuns, elements=elements)
+                np.savez(f'data/model_comp_data(AGB,SN2,SN1a)/{agb}_{sn2}_{sn1a}_val.npz', params=thetas, abundances=abuns, elements=elements)
     
     end = time.time()
     print(f"Time taken: {end - start:.1f} s")
