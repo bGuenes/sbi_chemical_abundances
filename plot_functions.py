@@ -403,35 +403,38 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title, prior=n
 
     # create a multivariate normal
     posterior = multivariate_normal(mean=[mu_alpha,mu_log10N_Ia], cov=[[sigma_alpha**2,0],[0,sigma_log10N_Ia**2]])
-    samples = posterior.rvs(size=100_000_000)
+    #samples = posterior.rvs(size=100_000_000)
 
     # create a figure
     plt.figure(figsize=(15,15))
     
-    plt.hist2d(samples[:,0], samples[:,1], bins=500, range=[grid_x, grid_y])
+    #plt.hist2d(samples[:,0], samples[:,1], bins=500, range=[grid_x, grid_y])
 
     # labels
     label_gt = r'Ground Truth' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${global_params[0,0]:.2f}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${global_params[0,1]:.2f}$'
     label_fit = r'Fit' + f"\n" + r"$\alpha_{\rm IMF} = $" + f'${mu_alpha:.3f} \\pm {sigma_alpha:.3f}$' + f"\n" + r"$\log_{10} N_{\rm Ia} = $" + f'${mu_log10N_Ia:.3f} \\pm {sigma_log10N_Ia:.3f}$'
     
-    legend_true = plt.scatter(global_params[0,0], global_params[0,1], color='red', label=label_gt, s=100)
-    legend_fit = plt.scatter(mu_alpha, mu_log10N_Ia, color='k', label=label_fit, s=100)
-    
-    legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
-    legend_true = plt.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.99))
-    
 
     # Sigma levels
     levels = []
-    sigma = np.array([3,2,1], dtype=float)
+    sigma = np.array([3,2,1,0], dtype=float)
     for n in sigma:
         levels.append(posterior.pdf([mu_alpha+n*sigma_alpha, mu_log10N_Ia+n*sigma_log10N_Ia]))
+    cmap = plt.get_cmap('Blues')
+    colors = [cmap(0.3), cmap(0.5), cmap(0.8)]
+    cf = plt.contourf(x, y, posterior.pdf(pos), levels=levels, colors=colors, alpha=0.7)
     CS = plt.contour(x, y, posterior.pdf(pos), levels=levels, colors='k', linestyles='dashed')
     text = plt.clabel(CS, inline=True, fontsize=15)
     for t in text:
         i = np.abs(np.array(levels) - float(t._text)).argmin()
         s = int(sigma[i])
         t.set(text=f'{s} $\\sigma$')
+
+    legend_true = plt.scatter(global_params[0,0], global_params[0,1], color='k', label=label_gt, s=200, marker='x')
+    legend_fit = plt.scatter(mu_alpha, mu_log10N_Ia, color='blue', label=label_fit, s=100)
+    
+    legend_fit = plt.legend(handles=[legend_fit], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.9))
+    legend_true = plt.legend(handles=[legend_true], fontsize=15, shadow=True, fancybox=True, loc=2, bbox_to_anchor=(0, 0.99))
 
     plt.xlabel(r'$\alpha_{\rm IMF}$', fontsize=40)
     plt.ylabel(r'$\log_{10} N_{\rm Ia}$', fontsize=40)
@@ -440,7 +443,7 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title, prior=n
     plt.gca().add_artist(legend_fit)
     plt.gca().add_artist(legend_true)
     
-    plt.title(title, fontsize=60)
+    #plt.title(title, fontsize=60)
 
     plt.tight_layout()
     plt.savefig(f'./plots/{title}.png')
