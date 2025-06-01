@@ -6,19 +6,42 @@ from scipy.stats import multivariate_normal
 
 ##########################################################################################################
 # --- Calculate mean and error ---
-def mean_std(x, mu_prior, sigma_prior):
-    # Calculate mean and std for each observation
-    mu_sample, sigma_sample = x.mean(axis=1), x.std(axis=1)
+# def mean_std(x, mu_prior, sigma_prior):
+#     # Calculate mean and std for each observation
+#     mu_sample, sigma_sample = x.mean(axis=1), x.std(axis=1)
 
-    # Calculate mean and std for joint distribution
-    mu = (np.sum(mu_sample/sigma_sample**2))/(np.sum(1/sigma_sample**2))
-    sigma = 1/np.sqrt(np.sum(1/sigma_sample**2))
+#     # Calculate mean and std for joint distribution
+#     mu = (np.sum(mu_sample/sigma_sample**2))/(np.sum(1/sigma_sample**2))
+#     sigma = 1/np.sqrt(np.sum(1/sigma_sample**2))
 
-    # Calculate the product of the prior and posterior
-    mu_post = (mu/sigma**2 - (1-len(x))*mu_prior/sigma_prior**2)/(1/sigma**2 - (1-len(x))/sigma_prior**2)
-    sigma_post = 1/np.sqrt(1/sigma**2 - (1-len(x))/sigma_prior**2)
+#     # Calculate the product of the prior and posterior
+#     mu_post = (mu/sigma**2 - (1-len(x))*mu_prior/sigma_prior**2)/(1/sigma**2 - (1-len(x))/sigma_prior**2)
+#     sigma_post = 1/np.sqrt(1/sigma**2 - (1-len(x))/sigma_prior**2)
 
-    return mu_post, sigma_post
+#     return mu_post, sigma_post
+
+def mean_std(data, mu_prior, sigma_prior):
+    
+    prior_mean = mu_prior
+    prior_cov = np.array([[sigma_prior[0]**2, 0], [0, sigma_prior[1]**2]])
+    mean_n = np.zeros_like(prior_mean)
+    inv_cov = np.zeros_like(prior_cov)
+    n = len(data)
+
+    for x in data:
+        mean = x.mean(axis=0)
+        cov_n = np.cov(x, rowvar=False)
+        inv_cov_n = np.linalg.inv(cov_n)
+
+        mean_n += inv_cov_n@mean
+        inv_cov += inv_cov_n
+
+    post_cov = inv_cov - ((1-n)*np.linalg.inv(prior_cov))
+    post_cov = np.linalg.inv(post_cov)
+
+    post_mean = post_cov@(mean_n - (1-n)*(np.linalg.inv(prior_cov)@prior_mean))
+
+    return post_mean, post_cov
 
 ##########################################################################################################
 # --- Plot 1D Histogram ---
@@ -220,11 +243,13 @@ def n_stars_plot(x1, x2, x_true, save_name, no_stars= np.array([1, 10, 100, 500,
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        mu_alpha, sigma_alpha = mean_std(x1[:n], prior[0,0], prior[1,0])
-        mu_logNIa, sigma_logNIa = mean_std(x2[:n], prior[0,1], prior[1,1])
+        data = np.stack([x1[:n], x2[:n]],2)
+        mu, cov = mean_std(data, prior[0], prior[1])
+        mu_alpha, mu_log10N_Ia = mu[0], mu[1]
+        sigma_alpha, sigma_log10N_Ia = np.sqrt(cov[0,0]), np.sqrt(cov[1,1])
 
-        fit.append([mu_alpha, mu_logNIa])
-        err.append([sigma_alpha, sigma_logNIa])
+        fit.append([mu_alpha, mu_log10N_Ia])
+        err.append([sigma_alpha, sigma_log10N_Ia])
         
 
     fit = np.array(fit)
@@ -284,11 +309,13 @@ def n_stars_plot_comp(x1, x2, x_true, dat, save_name, no_stars= np.array([1, 10,
 
     # --- Fit a 2D Gaussian to the data ---
     for n in no_stars:
-        mu_alpha, sigma_alpha = mean_std(x1[:n], prior[0,0], prior[1,0])
-        mu_logNIa, sigma_logNIa = mean_std(x2[:n], prior[0,1], prior[1,1])
+        data = np.stack([x1[:n], x2[:n]],2)
+        mu, cov = mean_std(data, prior[0], prior[1])
+        mu_alpha, mu_log10N_Ia = mu[0], mu[1]
+        sigma_alpha, sigma_log10N_Ia = np.sqrt(cov[0,0]), np.sqrt(cov[1,1])
 
-        fit.append([mu_alpha, mu_logNIa])
-        err.append([sigma_alpha, sigma_logNIa])
+        fit.append([mu_alpha, mu_log10N_Ia])
+        err.append([sigma_alpha, sigma_log10N_Ia])
         
 
     fit = np.array(fit)
@@ -372,8 +399,12 @@ def ape_plot(ape, labels_in, save_path):
 
 def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title, prior=np.array([[-2.3, -2.89], [0.3, 0.3]])):
 
-    mu_alpha, sigma_alpha = mean_std(alpha_IMF, prior[0,0], prior[1,0])
-    mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia, prior[0,1], prior[1,1])
+    #mu_alpha, sigma_alpha = mean_std(alpha_IMF, prior[0,0], prior[1,0])
+    #mu_log10N_Ia, sigma_log10N_Ia = mean_std(log10_N_Ia, prior[0,1], prior[1,1])
+    data = np.stack([alpha_IMF, log10_N_Ia],2)
+    mu, cov = mean_std(data, prior[0], prior[1])
+    mu_alpha, mu_log10N_Ia = mu[0], mu[1]
+    sigma_alpha, sigma_log10N_Ia = np.sqrt(cov[0,0]), np.sqrt(cov[1,1])
 
     # create a grid of points
     #grid_x = [-2.35,-2.25]
@@ -402,7 +433,7 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title, prior=n
     pos = np.dstack((x, y))
 
     # create a multivariate normal
-    posterior = multivariate_normal(mean=[mu_alpha,mu_log10N_Ia], cov=[[sigma_alpha**2,0],[0,sigma_log10N_Ia**2]])
+    posterior = multivariate_normal(mean=mu, cov=cov)
     #samples = posterior.rvs(size=100_000_000)
 
     # create a figure
