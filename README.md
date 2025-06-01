@@ -52,7 +52,8 @@ The second set is created from $CHEMPY$ directly with an alternative yield set. 
 The third set is data created with the TNG simulator. <br>
 
 ## 4. Multistar Posterior
-By applying Bayes rule twice, we can write down the posterior distribution for the galactic parameters $P(\Lambda|\mathbf{x})$ given the chemical abundances of $N_{stars}$ stars $\mathbf{x}$ by factorizing the posterior distribution into a product of single star posteriors $P(\Lambda|x_i)$ and the prior distribution $P(\Lambda)$.
+By applying Bayes rule twice, we can write down the posterior distribution for the galactic parameters $P(\Lambda|\mathbf{x})$ given the chemical abundances of $N_ {stars}$ stars $\mathbf{x}$ by factorizing the posterior distribution into a product of single star posteriors $P(\Lambda|x_ i)$ and the prior distribution $P(\Lambda)$.
+
 $$ 
 \begin{align*}
 P(\Lambda| data) &\propto P(\Lambda)P(data|\Lambda) \\
@@ -61,13 +62,16 @@ P(\Lambda| data) &\propto P(\Lambda)P(data|\Lambda) \\
 &= P(\Lambda)^{1-N_{stars}} \prod_ {i=1}^{N_{stars}} P(\Lambda|obs_i)
 \end{align*} 
 $$
-In order to calculate the factorized posterior distribution, we can simplify the equation above by using the fact that the prior is a Gaussian distribution with mean $\mathbf{\mu}_{\rm Prior}$ and covariance matrix $\mathbf{\Sigma}_{\rm Prior}$, and assume the single star posteriors $P(\Lambda|obs_i)$ are also Gaussian distributions with mean $\mathbf{\mu}_i$ and covariance matrix $\mathbf{\Sigma}_i$, making it possible to compute the posterior distribution analytically. <br>
+
+In order to calculate the factorized posterior distribution, we can simplify the equation above by using the fact that the prior is a Gaussian distribution with mean $\mathbf{\mu}_ {\rm Prior}$ and covariance matrix $\mathbf{\Sigma}_ {\rm Prior}$, and assume the single star posteriors $P(\Lambda|obs_ i)$ are also Gaussian distributions with mean $\mathbf{\mu}_ i$ and covariance matrix $\mathbf{\Sigma}_ i$, making it possible to compute the posterior distribution analytically. <br>
 Since the product of Gaussians is also a Gaussian, we can compute the mean and covariance matrix of the posterior distribution analytically. <br>
 
-$$ \begin{align*}
-\mathbf{\Sigma}_{\rm Posterior}^{-1} &= \Big( \sum_i^N \mathbf{\Sigma}_i^{-1} - (1-N) \mathbf{\Sigma}_{\rm Prior}^{-1}   \Big) \\
-\mathbf{\mu}_{\rm Posterior} &= \mathbf{\Sigma}_{\rm Posterior} \Big( \sum_i^N \mathbf{\Sigma}_i^{-1} \mathbf{\mu}_i - (1-N) \mathbf{\Sigma}_{\rm Prior}^{-1} \mathbf{\mu}_{\rm Prior} \Big)
-\end{align*}$$
+$$ 
+\begin{align*}
+\mathbf{\Sigma}_ {\rm Posterior}^{-1} &= \Big( \sum_ i^N \mathbf{\Sigma}_ i^{-1} - (1-N) \mathbf{\Sigma}_ {\rm Prior}^{-1} \Big) \\
+\mathbf{\mu}_ {\rm Posterior} &= \mathbf{\Sigma}_ {\rm Posterior} \Big( \sum_ i^N \mathbf{\Sigma}_ i^{-1} \mathbf{\mu}_ i - (1-N) \mathbf{\Sigma}_ {\rm Prior}^{-1} \mathbf{\mu}_ {\rm Prior} \Big)
+\end{align*}
+$$
 
 ### $CHEMPY$ TNG yield set
 <p align="center">
