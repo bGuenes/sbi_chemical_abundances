@@ -52,39 +52,22 @@ The second set is created from $CHEMPY$ directly with an alternative yield set. 
 The third set is data created with the TNG simulator. <br>
 
 ## 4. Multistar Posterior
-We can compute the posterior for a single star from the samples from the NPE. <br>
-Because of the central limit theorem, the posterior for a single star is a multivariate Gaussian. We can fit this with the sampled parameters from the NPE. <br>
-This gives us the mean and covariance of $\alpha_{IMF}$ and $log{N_{Ia}}$ for one observation. <br>
-
-The factorization for the posterior distribution  $P(\Lambda|\mathbf{x})$ can be obtained by applying Bayes rule twice:
-
+By applying Bayes rule twice, we can write down the posterior distribution for the galactic parameters $P(\Lambda|\mathbf{x})$ given the chemical abundances of $N_{stars}$ stars $\mathbf{x}$ by factorizing the posterior distribution into a product of single star posteriors $P(\Lambda|x_i)$ and the prior distribution $P(\Lambda)$.
 $$ 
 \begin{align*}
 P(\Lambda| data) &\propto P(\Lambda)P(data|\Lambda) \\
 &= P(\Lambda) \prod_ {i=1}^{N_{stars}} P(obs_i|\Lambda) \\ \\
 &\propto P(\Lambda) \prod_ {i=1}^{N_{stars}} \frac{P(\Lambda|obs_i)}{P(\Lambda)} \\ \\
-&= P(\Lambda)^{1-N_{stars}} \prod_ {i=1}^{N_{stars}} P(\Lambda|obs_i)\\ \\
-&= \exp \left(-\frac{(1-N_ {stars})(\Lambda-\mu_ {prior})^2}{2\sigma_ {prior}^2}\right)\prod_ {i=1}^{N_{stars}} \exp \left(-\frac{1}{2} \frac{(\Lambda-\mu_i)^2}{\sigma_i^2}\right)
+&= P(\Lambda)^{1-N_{stars}} \prod_ {i=1}^{N_{stars}} P(\Lambda|obs_i)
 \end{align*} 
 $$
+In order to calculate the factorized posterior distribution, we can simplify the equation above by using the fact that the prior is a Gaussian distribution with mean $\mathbf{\mu}_{\rm Prior}$ and covariance matrix $\mathbf{\Sigma}_{\rm Prior}$, and assume the single star posteriors $P(\Lambda|obs_i)$ are also Gaussian distributions with mean $\mathbf{\mu}_i$ and covariance matrix $\mathbf{\Sigma}_i$, making it possible to compute the posterior distribution analytically. <br>
+Since the product of Gaussians is also a Gaussian, we can compute the mean and covariance matrix of the posterior distribution analytically. <br>
 
-The product of the single star posteriors is a product of Gaussians, so it's also a Gaussian with mean $\mathbf{\mu'}$ and variance $\mathbf{\sigma'}$:
-
-$$
-\begin{align*}
-\mathbf{\mu'} &= \frac{\sum_{i=1}^{N_{stars}} \frac{\mu_i}{\sigma_i^2}}{\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}} \\ \\
-\mathbf{\sigma'}^2 &= \frac1 {\sum_{i=1}^{N_{stars}} \frac1{\sigma_i^2}}
-\end{align*}
-$$
-
-In our case the prior for the galactic parameters $\Lambda$ is a gaussian as well. Therefore the resulting factorized posterior is again a gaussian and can be expressed with mean $\mathbf{\mu}$ and variance $\mathbf{\sigma}$:
-
-$$
-\begin{align*}
-\mathbf{\mu} &= \frac{\frac{\mu'}{\sigma'^2}-\frac{(1-N)\mu_ {prior}}{\sigma_ {prior}^2}}{\frac1{\sigma'^2}-\frac{(1-N)}{\sigma_ {prior}^2}} \\ \\
-\mathbf{\sigma}^2 &= \frac1 {\frac1{\sigma'^2}-\frac{(1-N)}{\sigma_ {prior}^2}}
-\end{align*}
-$$
+$$ \begin{align*}
+\mathbf{\Sigma}_{\rm Posterior}^{-1} &= \Big( \sum_i^N \mathbf{\Sigma}_i^{-1} - (1-N) \mathbf{\Sigma}_{\rm Prior}^{-1}   \Big) \\
+\mathbf{\mu}_{\rm Posterior} &= \mathbf{\Sigma}_{\rm Posterior} \Big( \sum_i^N \mathbf{\Sigma}_i^{-1} \mathbf{\mu}_i - (1-N) \mathbf{\Sigma}_{\rm Prior}^{-1} \mathbf{\mu}_{\rm Prior} \Big)
+\end{align*}$$
 
 ### $CHEMPY$ TNG yield set
 <p align="center">
@@ -120,4 +103,5 @@ We test the NPE by sampling from a different values for the galactic parameters.
 
 <p align="center">
   <img src="plots/CHEMPY TNG yields N_star test.png" />
+  <img src="plots/CHEMPY TNG yields test.png" />
 </p>

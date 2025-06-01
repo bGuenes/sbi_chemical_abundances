@@ -410,16 +410,16 @@ def gaussian_posterior_plot(alpha_IMF, log10_N_Ia, global_params, title, prior=n
     #grid_x = [-2.35,-2.25]
     #grid_y = [-3.0,-2.84]
 
-    xlim = [-0.05, 0.05]
-    ylim = [-0.05, 0.05]
+    xlim = [-0.03, 0.03]
+    ylim = [-0.03, 0.03]
 
-    if np.abs(global_params[0,0]-mu_alpha) > 0.05:
+    if np.abs(global_params[0,0]-mu_alpha) > 0.03:
         if mu_alpha-global_params[0,0] < 0:
             xlim[0] = mu_alpha-global_params[0,0]-10*sigma_alpha
         elif mu_alpha-global_params[0,0] > 0:
             xlim[1] = mu_alpha-global_params[0,0]+10*sigma_alpha
 
-    if np.abs(global_params[0,1]-mu_log10N_Ia) > 0.05:
+    if np.abs(global_params[0,1]-mu_log10N_Ia) > 0.03:
         if mu_log10N_Ia-global_params[0,1] < 0:
             ylim[0] = mu_log10N_Ia-global_params[0,1]-10*sigma_log10N_Ia
         elif mu_log10N_Ia-global_params[0,1] > 0:
